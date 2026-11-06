@@ -8,7 +8,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const user = await getCurrentUser();
   if (!user) return new NextResponse("Unauthorized", { status: 401 });
   const { id } = await params;
-  const event = await prisma.event.findFirst({ where: { id, ownerId: user.id } });
+  // only the names for the file name — not the whole row with the cover image bytes [review M-8]
+  const event = await prisma.event.findFirst({ where: { id, ownerId: user.id }, select: { groomName: true, brideName: true } });
   if (!event) return new NextResponse("Not found", { status: 404 });
 
   const { t } = await getDict();
