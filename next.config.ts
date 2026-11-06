@@ -1,8 +1,13 @@
 import type { NextConfig } from "next";
 
+// The tester server (scripts/testers.mjs) builds into its own folder, so it can run next to
+// `npm run dev`, which owns .next, and is served by `next start` (which doesn't support standalone)
+const testers = Boolean(process.env.NEXT_DIST_DIR);
+
 const nextConfig: NextConfig = {
   // Self-contained server in .next/standalone for the Docker image (see Dockerfile)
-  output: "standalone",
+  output: testers ? undefined : "standalone",
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   experimental: {
     serverActions: {
       // Guest imports, cover photos and invitation music (≤10MB) go through server actions

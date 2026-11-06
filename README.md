@@ -22,7 +22,7 @@ cp .env.example .env        # DATABASE_URL points at the compose DB on port 5434
 docker compose up -d        # Postgres -> localhost:5434
 npx prisma migrate dev      # apply migrations
 npm run db:seed             # optional demo data
-npm run dev                 # http://localhost:3000
+npm run dev                 # http://localhost:3001
 ```
 
 The seed creates a demo account `demo@example.com` / `demo12345`
@@ -45,7 +45,7 @@ docker exec -it wedding-invite-db psql -U wedding -d wedding_invite -c "ALTER US
 ```
 
 then put the same password in `.env` — in both `POSTGRES_PASSWORD` and
-`DATABASE_URL` — and restart `npm run dev`.
+`DATABASE_URL` — and restart `npm run dev` (http://localhost:3001).
 
 After pulling schema changes, run `npx prisma migrate dev` and **restart
 `npm run dev`**. On Windows the running dev server locks Prisma's engine DLL, so
@@ -57,6 +57,20 @@ Useful scripts: `npm run db:up`, `npm run db:migrate`, `npm run db:seed`,
 
 Tests: `npm test` (unit, no database) and `npm run test:db` (against a throwaway
 Postgres from `docker-compose.test.yml`) — see [tests/README.md](tests/README.md).
+
+## Tester server (production build on this PC)
+
+Testers reach the app through the Cloudflare tunnel on `localhost:3000`. Serve them a production
+build there (fast, no dev error overlays) and keep developing on port 3001:
+
+```bash
+npm run testers:build   # build into .next-prod (the dev server keeps .next)
+npm run testers:start   # serve it on :3000, same .env, database and uploads
+npm run dev             # http://localhost:3001
+```
+
+The tester server does not pick up code changes: run `testers:build` again, then restart
+`testers:start`.
 
 ## Production (Docker)
 
