@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run --project unit",
+    "test:db": "vitest run --project db",
+    "test:watch": "vitest --project unit",
     "db:up": "docker compose up -d",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
@@ -40,7 +43,8 @@
     "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -1,0 +1,22 @@
+# Throwaway Postgres for `npm run test:db` — its own project, data in memory (tmpfs), nothing
+# from the dev or production databases. The password is a fixed local-only test value.
+#   docker compose -f docker-compose.test.yml up -d
+#   docker compose -f docker-compose.test.yml down   # data is gone with the container
+name: wedding-invite-test
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: wedding_test
+      POSTGRES_PASSWORD: wedding_test
+      POSTGRES_DB: wedding_invite_test
+    ports:
+      - "127.0.0.1:5435:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wedding_test -d wedding_invite_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 20

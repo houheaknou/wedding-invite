@@ -55,6 +55,9 @@ memory until it is restarted.
 Useful scripts: `npm run db:up`, `npm run db:migrate`, `npm run db:seed`,
 `npm run db:studio`, `npm run lint`, `npm run build`.
 
+Tests: `npm test` (unit, no database) and `npm run test:db` (against a throwaway
+Postgres from `docker-compose.test.yml`) — see [tests/README.md](tests/README.md).
+
 ## Production (Docker)
 
 `docker-compose.prod.yml` runs the database, a one-shot migration job and the

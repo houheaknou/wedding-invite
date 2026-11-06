@@ -12,3 +12,5 @@ docs/design-refs
 tsconfig.tsbuildinfo
 Dockerfile
 docker-compose*.yml
+tests
+vitest.config.ts
