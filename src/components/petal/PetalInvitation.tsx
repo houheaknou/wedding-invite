@@ -45,6 +45,7 @@ const T = {
     errName: "សូមបញ្ចូលឈ្មោះ",
     errPhone: "សូមបញ្ចូលលេខទូរស័ព្ទ",
     errClosed: "ការឆ្លើយតបត្រូវបានបិទ",
+    errLimit: "ផ្ញើច្រើនដងពេក សូមព្យាយាមម្តងទៀតពេលក្រោយ",
     preview: "មើលជាមុន — ទម្រង់នេះដំណើរការនៅលើតំណដែលបានចែករំលែក។",
     thanks: "សូមអរគុណ",
     share: "ចែករំលែកធៀប",
@@ -85,6 +86,7 @@ const T = {
     errName: "Please enter your name",
     errPhone: "Please enter your phone number",
     errClosed: "RSVP is closed",
+    errLimit: "Too many replies — please try again later",
     preview: "Preview — the form works on the shared link.",
     thanks: "Thank you",
     share: "Share invitation",
@@ -296,7 +298,8 @@ function Wishes({ data, t }: { data: InvitationData; t: (typeof T)["km"] }) {
   );
   // Inside the builder the preview sits in the builder's <form>: plain, unnamed, non-required fields
   const n = (name: string) => (target ? name : undefined);
-  const err = state?.error === "name" ? t.errName : state?.error === "phone" ? t.errPhone : state?.error ? t.errClosed : null;
+  const err =
+    state?.error === "name" ? t.errName : state?.error === "phone" ? t.errPhone : state?.error === "limit" ? t.errLimit : state?.error ? t.errClosed : null;
   const [answer, setAnswer] = useState<"YES" | "NO">("YES");
   const [count, setCount] = useState(1);
   const [message, setMessage] = useState("");

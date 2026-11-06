@@ -41,6 +41,7 @@ const T = {
     errName: "សូមបញ្ចូលឈ្មោះ",
     errPhone: "សូមបញ្ចូលលេខទូរស័ព្ទ",
     errClosed: "ការឆ្លើយតបត្រូវបានបិទ",
+    errLimit: "ផ្ញើច្រើនដងពេក សូមព្យាយាមម្តងទៀតពេលក្រោយ",
     preview: "នេះជាការមើលជាមុន — ទម្រង់នេះដំណើរការនៅលើតំណដែលបានចែករំលែក។",
     copied: "បានចម្លងតំណ",
   },
@@ -67,6 +68,7 @@ const T = {
     errName: "Please enter your name",
     errPhone: "Please enter your phone number",
     errClosed: "RSVP is closed",
+    errLimit: "Too many replies — please try again later",
     preview: "This is a preview — the form works on the shared link.",
     copied: "Link copied",
   },
@@ -250,8 +252,10 @@ function RsvpForm({ data, t }: { data: InvitationData; t: (typeof T)["km"] }) {
       ? t.errName
       : state?.error === "phone"
         ? t.errPhone
-        : state?.error
-          ? t.errClosed
+        : state?.error === "limit"
+          ? t.errLimit
+          : state?.error
+            ? t.errClosed
           : null;
   const icon = (d: string) => (
     <svg

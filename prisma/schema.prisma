@@ -292,3 +292,13 @@ model Gift {
   @@index([eventId])
   @@index([guestId])
 }
+
+/// Attempt counters for login, sign-up and RSVP (lib/rate-limit) [review S-2]. One row per key
+/// (e.g. "login:<ip>:<login>") and time window; stale rows are swept on use.
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+
+  @@index([resetAt])
+}

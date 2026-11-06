@@ -201,7 +201,16 @@ function Rsvp({ data }: { data: InvitationData }) {
   );
   // In builder previews this sits inside the builder's <form>: unnamed, non-required fields
   const n = (name: string) => (target ? name : undefined);
-  const err = state?.error === "name" ? "សូមបញ្ចូលឈ្មោះ" : state?.error === "phone" ? "សូមបញ្ចូលលេខទូរស័ព្ទ" : state?.error ? "ការឆ្លើយតបត្រូវបានបិទ" : null;
+  const err =
+    state?.error === "name"
+      ? "សូមបញ្ចូលឈ្មោះ"
+      : state?.error === "phone"
+        ? "សូមបញ្ចូលលេខទូរស័ព្ទ"
+        : state?.error === "limit"
+          ? "ផ្ញើច្រើនដងពេក សូមព្យាយាមម្តងទៀតពេលក្រោយ"
+          : state?.error
+            ? "ការឆ្លើយតបត្រូវបានបិទ"
+            : null;
   const fields = (
     <>
       {target && <input className={s.hp} name="website" tabIndex={-1} autoComplete="off" aria-hidden />}
