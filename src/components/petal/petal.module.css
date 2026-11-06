@@ -274,7 +274,8 @@ button.map { display: block; width: 100%; height: auto; padding: 0; cursor: zoom
 
 /* footer */
 .footer { padding: 32px 22px 120px; }
-.thanks { font: 400 18px/1.9 var(--km-display); color: var(--gold-dark); }
+.thanks { font: 400 clamp(15px, 4.4vw, 18px)/1.9 var(--km-display); color: var(--gold-dark); text-wrap: balance; }
+.thanksEn { margin-top: 2px !important; font: italic 400 15px/1.5 var(--latin); color: #a08a5a; }
 .share { display: flex; justify-content: center; gap: 10px; margin-top: 12px; }
 .share button { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; border: 0; cursor: pointer; color: #fff; background: linear-gradient(180deg, #f9cfa4, #e2a058); box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.6) inset, 0 4px 10px rgba(200, 130, 60, 0.25); transition: transform 0.2s; }
 .share button:hover { transform: translateY(-3px); }

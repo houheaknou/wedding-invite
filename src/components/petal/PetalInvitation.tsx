@@ -47,8 +47,8 @@ const T = {
     errClosed: "ការឆ្លើយតបត្រូវបានបិទ",
     errLimit: "ផ្ញើច្រើនដងពេក សូមព្យាយាមម្តងទៀតពេលក្រោយ",
     preview: "មើលជាមុន — ទម្រង់នេះដំណើរការនៅលើតំណដែលបានចែករំលែក។",
-    thanks: "សូមអរគុណ",
-    share: "ចែករំលែកធៀប",
+    thanks: "សូមអរគុណចំពោះការចូលរួមក្នុងថ្ងៃដ៏មានន័យរបស់យើង",
+    thanksSub: "Thank you for being a part of our special day!",
     nav: ["ទំព័រដើម", "ទីតាំង", "រូបភាព", "ប្រតិទិន", "សារជូនពរ", "ឡើងលើ"],
   },
   en: {
@@ -88,8 +88,8 @@ const T = {
     errClosed: "RSVP is closed",
     errLimit: "Too many replies — please try again later",
     preview: "Preview — the form works on the shared link.",
-    thanks: "Thank you",
-    share: "Share invitation",
+    thanks: "Thank you for being a part of our special day!",
+    thanksSub: "",
     nav: ["Home", "Venue", "Gallery", "Calendar", "Wishes", "Top"],
   },
 };
@@ -722,7 +722,7 @@ export function PetalInvitation({
           <p className={s.thanks} style={{ marginTop: 12 }}>
             {t.thanks} 💕
           </p>
-          <p className={s.sub}>{t.share}</p>
+          {t.thanksSub && <p className={s.thanksEn}>{t.thanksSub}</p>}
           <div className={s.share}>
             <button type="button" aria-label="Telegram" onClick={share("https://t.me/share/url?url=")}>
               <Send size={16} />
