@@ -14,6 +14,11 @@ export const btnIcon =
   "inline-flex size-8 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700";
 export const card = "rounded-3xl border border-brand-100 bg-white p-5 shadow-sm shadow-brand-900/[0.03]";
 export const chip = "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap";
+/**
+ * Cover photo in a wide frame: crop from near the top instead of the middle. Couples' covers are
+ * mostly portrait shots, where a centred 2:1 crop shows hands and dress and cuts off the faces.
+ */
+export const coverFit = "size-full object-cover object-[50%_15%]";
 
 export function Field({
   label,

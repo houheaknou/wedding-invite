@@ -23,7 +23,7 @@ import { deleteEvent } from "@/actions/events";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { Donut } from "@/components/Donut";
 import { FinanceSummary } from "@/components/FinanceSummary";
-import { btnDanger, btnPrimary, card, chip } from "@/components/ui";
+import { btnDanger, btnPrimary, card, chip, coverFit } from "@/components/ui";
 
 const RSVP_CHIP: Record<RsvpAnswer, string> = {
   YES: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
@@ -70,7 +70,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ id: 
           <div className="relative aspect-[2/1] bg-gradient-to-br from-brand-100 via-brand-50 to-amber-200 md:aspect-auto md:w-80 md:shrink-0">
             {cover ? (
               // eslint-disable-next-line @next/next/no-img-element -- auth-gated route
-              <img src={cover} alt="" className="absolute inset-0 size-full object-cover" />
+              <img src={cover} alt="" className={`absolute inset-0 ${coverFit}`} />
             ) : (
               <span className="absolute inset-0 flex items-center justify-center text-6xl">💍</span>
             )}

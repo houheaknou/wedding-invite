@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CalendarDays, Check, ChevronDown, ChevronLeft, ImageIcon, ListChecks, Upload, X } from "lucide-react";
 import type { FormState } from "@/actions/auth";
 import { SubmitButton } from "@/components/SubmitButton";
-import { btnPrimary, btnSecondary, ErrorText, Field, inputCls, textareaCls } from "@/components/ui";
+import { btnPrimary, btnSecondary, coverFit, ErrorText, Field, inputCls, textareaCls } from "@/components/ui";
 import { EVENT_TYPES } from "@/lib/constants";
 import type { EventFormDict } from "@/lib/ui-keys";
 
@@ -70,7 +70,7 @@ export function EventForm({
         <div className="relative aspect-[2/1] w-full max-w-md overflow-hidden rounded-2xl border border-dashed border-brand-200 bg-gradient-to-br from-brand-50 via-white to-brand-100">
           {preview ? (
             // eslint-disable-next-line @next/next/no-img-element -- blob: previews and auth-gated route
-            <img src={preview} alt="" className="size-full object-cover" />
+            <img src={preview} alt="" className={coverFit} />
           ) : (
             <button
               type="button"

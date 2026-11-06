@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { fmt, getDict } from "@/lib/i18n";
 import { coverUrl, daysUntil, formatDateTime } from "@/lib/format";
-import { btnPrimary, card, chip } from "@/components/ui";
+import { btnPrimary, card, chip, coverFit } from "@/components/ui";
 
 export default async function EventsPage() {
   const user = await requireUser();
@@ -48,7 +48,7 @@ export default async function EventsPage() {
                   <div className="relative aspect-[2/1] bg-gradient-to-br from-brand-100 via-brand-50 to-amber-200">
                     {cover ? (
                       // eslint-disable-next-line @next/next/no-img-element -- auth-gated route
-                      <img src={cover} alt="" className="size-full object-cover" />
+                      <img src={cover} alt="" className={coverFit} />
                     ) : (
                       <span className="absolute inset-0 flex items-center justify-center text-5xl transition group-hover:scale-110">
                         💍
