@@ -70,8 +70,11 @@ export async function requireUser() {
   return user;
 }
 
-/** Load an event only if it belongs to the signed-in user; 404 otherwise. */
-export async function requireOwnedEvent(eventId: string) {
+/**
+ * Load an event only if it belongs to the signed-in user; 404 otherwise. Cached per request, so the
+ * workspace layout and its page share one query (server actions still check on every call).
+ */
+export const requireOwnedEvent = cache(async (eventId: string) => {
   const user = await requireUser();
   const event = await prisma.event.findFirst({
     where: { id: eventId, ownerId: user.id },
@@ -79,4 +82,4 @@ export async function requireOwnedEvent(eventId: string) {
   });
   if (!event) notFound();
   return { user, event };
-}
+});
