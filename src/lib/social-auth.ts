@@ -30,8 +30,20 @@ export const googleRedirectUri = async () => `${await appOrigin()}/api/auth/goog
 type Profile = { provider: "google" | "telegram"; id: string; name: string; email?: string | null };
 
 /**
+ * Google's verified email matches an account that has a password. Sign-up never verifies emails,
+ * so joining them automatically would let someone pre-register a victim's email and later share the
+ * victim's account (pre-account hijacking) [review S-1]. The owner logs in with the password and links
+ * Google from My account instead.
+ */
+export class LinkRequiresLogin extends Error {}
+
+/** That provider identity already belongs to a different account. */
+export class SocialIdTaken extends Error {}
+
+/**
  * The user for a provider identity: already linked → that user; Google with a verified email that
- * matches an existing account → link it; otherwise a new account (no password until set on /account).
+ * matches a password-less (social-only) account → link it; matches a password account → refuse
+ * (LinkRequiresLogin); otherwise a new account (no password until set on /account).
  */
 export async function userForSocial(p: Profile): Promise<string> {
   const key = p.provider === "google" ? "googleId" : "telegramId";
@@ -39,8 +51,9 @@ export async function userForSocial(p: Profile): Promise<string> {
   if (linked) return linked.id;
 
   if (p.email) {
-    const byEmail = await prisma.user.findUnique({ where: { email: p.email }, select: { id: true } });
+    const byEmail = await prisma.user.findUnique({ where: { email: p.email }, select: { id: true, passwordHash: true } });
     if (byEmail) {
+      if (byEmail.passwordHash) throw new LinkRequiresLogin();
       await prisma.user.update({ where: { id: byEmail.id }, data: { [key]: p.id } });
       return byEmail.id;
     }
@@ -50,6 +63,14 @@ export async function userForSocial(p: Profile): Promise<string> {
     select: { id: true },
   });
   return user.id;
+}
+
+/** Link a provider identity to the signed-in user (from My account), unless another account has it. */
+export async function linkSocial(userId: string, p: Profile) {
+  const key = p.provider === "google" ? "googleId" : "telegramId";
+  const owner = await prisma.user.findUnique({ where: { [key]: p.id } as { googleId: string }, select: { id: true } });
+  if (owner && owner.id !== userId) throw new SocialIdTaken();
+  await prisma.user.update({ where: { id: userId }, data: { [key]: p.id } });
 }
 
 /** Exchange Google's `code` for the signed-in Google profile. */

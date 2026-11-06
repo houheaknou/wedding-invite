@@ -31,7 +31,8 @@ export async function SocialLogin({ t, error }: { t: Dict; error?: string }) {
   // or a LAN IP show a short note instead of a button that would fail.
   const localHost = /^https?:\/\/(localhost|127\.|\[::1\]|\d+\.\d+\.\d+\.\d+)/.test(origin);
   const telegram = Boolean(bot && botId && !localHost);
-  const failed = error === "google" ? t.errGoogleLogin : error === "telegram" ? t.errTelegramLogin : null;
+  const failed =
+    error === "google" ? t.errGoogleLogin : error === "google_link" ? t.errGoogleLink : error === "telegram" ? t.errTelegramLogin : null;
   if (!google && !bot) return failed ? <p className="text-center text-xs text-red-600">{failed}</p> : null;
 
   return (
