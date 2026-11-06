@@ -5,10 +5,10 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { destroyOtherSessions, normalizePhone, requireUser } from "@/lib/auth";
 import { getDict } from "@/lib/i18n";
+import { str } from "@/lib/parse";
 
 export type AccountState = { ok?: boolean; error?: string } | undefined;
 
-const str = (fd: FormData, key: string, max = 200) => String(fd.get(key) ?? "").trim().slice(0, max);
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Name, email and phone of the signed-in user. Email or phone is the login, so one must stay. */
@@ -16,7 +16,7 @@ export async function updateProfile(_: AccountState, fd: FormData): Promise<Acco
   const user = await requireUser();
   const { t } = await getDict();
   const name = str(fd, "name", 120);
-  const email = str(fd, "email").toLowerCase() || null;
+  const email = str(fd, "email", 200).toLowerCase() || null;
   const phoneRaw = str(fd, "phone", 40);
   const phone = phoneRaw ? normalizePhone(phoneRaw) : null;
 

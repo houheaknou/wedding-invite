@@ -10,16 +10,7 @@ import { parseExpenseFile } from "@/lib/expense-io";
 import { isSupportedFile } from "@/lib/guest-io";
 import type { FormState } from "@/actions/auth";
 import type { ImportState } from "@/actions/guests";
-
-const opt = (fd: FormData, key: string, max = 200) => String(fd.get(key) ?? "").trim().slice(0, max) || null;
-
-/** "1,250.50" / "1 250" / "" → number (null when blank or not a number ≥ 0) */
-function money(fd: FormData, key: string): number | null {
-  const raw = String(fd.get(key) ?? "").replace(/[,\s]/g, "");
-  if (!raw) return null;
-  const n = Number(raw);
-  return Number.isFinite(n) && n >= 0 && n < 1e12 ? Math.round(n * 100) / 100 : null;
-}
+import { money, opt } from "@/lib/parse";
 
 /** Total = quantity × unit price, like the budget sheet */
 function readExpense(fd: FormData) {

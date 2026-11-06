@@ -5,6 +5,7 @@ import type { GuestStatus, RsvpAnswer } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { normalizePhone } from "@/lib/auth";
 import { clientIp, hit } from "@/lib/rate-limit";
+import { str } from "@/lib/parse";
 
 // [review S-2, M-4] replies per IP per invitation, and guests an anonymous RSVP may add to one event
 const RSVP_PER_IP = { max: 20, windowSec: 60 * 60 };
@@ -14,7 +15,6 @@ export type RsvpState = { ok?: boolean; error?: "name" | "phone" | "closed" | "l
 
 const ANSWERS: RsvpAnswer[] = ["YES", "NO", "MAYBE"];
 const STATUS_FOR: Record<RsvpAnswer, GuestStatus> = { YES: "CONFIRMED", NO: "DECLINED", MAYBE: "INVITED" };
-const str = (fd: FormData, key: string, max: number) => String(fd.get(key) ?? "").trim().slice(0, max);
 
 /**
  * Public RSVP from a published invitation. The reply is stored and folded into the guest list:

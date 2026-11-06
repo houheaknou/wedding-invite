@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db";
 import { createSession, destroySession, normalizePhone } from "@/lib/auth";
 import { fmt, getDict, LANG_COOKIE, LANGS } from "@/lib/i18n";
 import { clear, clientIp, hit, minutes, peek } from "@/lib/rate-limit";
+import { str } from "@/lib/parse";
 
 // Attempt limits [review S-2]: failed logins per IP+login and per IP; sign-ups per IP
 const LOGIN_FAILS = { perLogin: 5, perIp: 30, windowSec: 15 * 60 };
@@ -14,7 +15,6 @@ const SIGNUPS = { perIp: 5, windowSec: 60 * 60 };
 
 export type FormState = { error?: string } | undefined;
 
-const str = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim();
 
 /** Split a single "email or phone" input into the matching column. */
 function identify(raw: string): { email: string } | { phone: string } {

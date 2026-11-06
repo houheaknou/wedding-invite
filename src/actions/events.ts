@@ -11,10 +11,10 @@ import { EVENT_TYPES } from "@/lib/constants";
 import { deleteMusic } from "@/lib/media";
 import { readImage } from "@/lib/file-check";
 import type { FormState } from "@/actions/auth";
+import { opt } from "@/lib/parse";
 
 const COVER_MAX_BYTES = 3 * 1024 * 1024;
 
-const opt = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim() || null;
 
 function readEvent(fd: FormData, t: Dict) {
   const groomName = opt(fd, "groomName");

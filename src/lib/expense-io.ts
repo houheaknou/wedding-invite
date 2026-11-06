@@ -5,6 +5,7 @@ import type { ExpenseCategory } from "@prisma/client";
 import { dicts, type Dict } from "@/lib/i18n";
 import { readRows } from "@/lib/guest-io";
 import { EXPENSE_CATEGORIES } from "@/lib/expenses";
+import { parseNumber, round2 } from "@/lib/parse";
 
 /**
  * Budget-sheet import/export. The layout follows the couple's own Excel plan: one table per group
@@ -48,13 +49,7 @@ for (const d of Object.values(dicts)) {
 const TOTAL_LABELS = new Set(["total", "grand total", "sub total", "subtotal", "សរុប", "សរុបរួម", ...Object.values(dicts).flatMap((d) => [norm(d.expenseTotal), norm(d.subtotal)])]);
 const isTotalLabel = (s: string) => TOTAL_LABELS.has(norm(s));
 
-/** "$ 1,250.00" · "1 250" · "៥០" · "-" → number; null when not a number */
-function num(raw: string): number | null {
-  const s = raw.replace(/[០-៩]/g, (c) => String(c.charCodeAt(0) - 0x17e0)).replace(/[$៛,\s]|usd|khr|riel/gi, "");
-  if (!s || /^-+$/.test(s)) return null;
-  const n = Number(s);
-  return Number.isFinite(n) ? n : null;
-}
+const num = parseNumber;
 
 function parseCategory(raw: string): ExpenseCategory {
   const v = norm(raw.replace(/\p{Extended_Pictographic}/gu, ""));
@@ -88,7 +83,6 @@ export type ImportedExpense = {
   notes: string | null;
 };
 
-const round2 = (n: number) => Math.round(n * 100) / 100;
 
 export async function parseExpenseFile(file: File): Promise<{ ok: true; expenses: ImportedExpense[]; skipped: number } | { ok: false }> {
   const rows = (await readRows(file)).map((r) => r.map((c) => (c ?? "").trim()));

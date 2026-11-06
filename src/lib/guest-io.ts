@@ -4,6 +4,7 @@ import Papa from "papaparse";
 import type { Guest, GuestSide, GuestStatus } from "@prisma/client";
 import { dicts, type Dict } from "@/lib/i18n";
 import { SIDES, STATUSES } from "@/lib/constants";
+import { khmerDigitsToAscii } from "@/lib/parse";
 
 export { SIDES, STATUSES };
 
@@ -59,7 +60,7 @@ function parseStatus(raw: string): GuestStatus {
 
 function parseCount(raw: string) {
   // Accept Khmer digits too (០-៩)
-  const ascii = raw.replace(/[០-៩]/g, (c) => String(c.charCodeAt(0) - 0x17e0));
+  const ascii = khmerDigitsToAscii(raw);
   const n = Number.parseInt(ascii, 10);
   return Number.isFinite(n) && n > 0 ? Math.min(n, 999) : 1;
 }

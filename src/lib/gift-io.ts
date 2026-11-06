@@ -5,6 +5,7 @@ import type { GiftMethod, GuestSide } from "@prisma/client";
 import { dicts, type Dict } from "@/lib/i18n";
 import { readRows } from "@/lib/guest-io";
 import { GIFT_METHODS, GIFT_SIDES, giftTotals } from "@/lib/gifts";
+import { parseNumber, round2 } from "@/lib/parse";
 
 /**
  * Gift book import/export. Khmer gift lists usually keep dollars and riel in two columns
@@ -36,11 +37,10 @@ for (const d of Object.values(dicts)) {
 }
 const isTotal = (s: string) => ["total", "សរុប", "grand total", ...Object.values(dicts).map((d) => norm(d.subtotal))].includes(norm(s));
 
+/** A gift amount: positive, cents-rounded; null otherwise */
 function num(raw: string): number | null {
-  const s = raw.replace(/[០-៩]/g, (c) => String(c.charCodeAt(0) - 0x17e0)).replace(/[$៛,\s]|usd|khr|riel/gi, "");
-  if (!s || /^-+$/.test(s)) return null;
-  const n = Number(s);
-  return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : null;
+  const n = parseNumber(raw);
+  return n !== null && n > 0 ? round2(n) : null;
 }
 
 function parseSide(raw: string): GuestSide | null {

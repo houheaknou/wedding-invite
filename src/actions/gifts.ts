@@ -11,15 +11,7 @@ import { parseGiftFile } from "@/lib/gift-io";
 import { isSupportedFile } from "@/lib/guest-io";
 import type { FormState } from "@/actions/auth";
 import type { ImportState } from "@/actions/guests";
-
-const opt = (fd: FormData, key: string, max = 200) => String(fd.get(key) ?? "").trim().slice(0, max) || null;
-
-function money(fd: FormData, key: string): number | null {
-  const raw = String(fd.get(key) ?? "").replace(/[,\s$៛]/g, "");
-  if (!raw) return null;
-  const n = Number(raw);
-  return Number.isFinite(n) && n > 0 && n < 1e12 ? Math.round(n * 100) / 100 : null;
-}
+import { money, opt } from "@/lib/parse";
 
 /** Same name as someone on the guest list → link the gift to that guest (and take their side if none given) */
 async function matchGuest(eventId: string, name: string) {
@@ -31,7 +23,7 @@ async function matchGuest(eventId: string, name: string) {
 
 async function readGift(eventId: string, fd: FormData) {
   const name = opt(fd, "name", 120);
-  const amount = money(fd, "amount");
+  const amount = money(fd, "amount", { allowZero: false });
   if (!name || amount === null) return null;
   const currency = String(fd.get("currency"));
   const side = String(fd.get("side")) as GuestSide;

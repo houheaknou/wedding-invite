@@ -8,10 +8,10 @@ import { requireOwnedEvent } from "@/lib/auth";
 import { fmt, getDict } from "@/lib/i18n";
 import { isSupportedFile, parseGuestFile, SIDES, STATUSES } from "@/lib/guest-io";
 import type { FormState } from "@/actions/auth";
+import { opt } from "@/lib/parse";
 
 export type ImportState = { error?: string; message?: string } | undefined;
 
-const opt = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim() || null;
 
 function readGuest(fd: FormData) {
   const name = opt(fd, "name");

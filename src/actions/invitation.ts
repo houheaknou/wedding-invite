@@ -10,10 +10,10 @@ import { BACKGROUNDS, FONT_STYLES, HEX, INVITE_LANGS, templateById, type InviteL
 import { deleteMusic, ensureInvitation, MUSIC_MAX_BYTES, saveMusic } from "@/lib/media";
 import { PHOTO_KINDS, PHOTO_MAX_BYTES } from "@/lib/photos";
 import { readAudio, readImage } from "@/lib/file-check";
+import { opt } from "@/lib/parse";
 
 export type SaveState = { error?: string; message?: string; at?: number } | undefined;
 
-const opt = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim() || null;
 const flag = (fd: FormData, key: string) => fd.get(key) === "1";
 const color = (fd: FormData, key: string, fallback: string) => {
   const v = String(fd.get(key) ?? "");
