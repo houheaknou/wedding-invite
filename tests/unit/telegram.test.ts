@@ -44,9 +44,15 @@ describe("telegramProfile", () => {
     expect(telegramProfile(params)).toBeNull();
   });
 
-  it("rejects a login older than a day (replayed link)", () => {
-    const old = String(Math.floor(Date.now() / 1000) - 25 * 60 * 60);
-    expect(telegramProfile(signed({ id: "42", auth_date: old }))).toBeNull();
+  it("rejects a login older than an hour (replayed link) [review L-5]", () => {
+    const at = (minutesAgo: number) => String(Math.floor(Date.now() / 1000) - minutesAgo * 60);
+    expect(telegramProfile(signed({ id: "42", auth_date: at(55) }))).not.toBeNull();
+    expect(telegramProfile(signed({ id: "42", auth_date: at(61) }))).toBeNull();
+  });
+
+  it("rejects a missing or non-numeric auth_date", () => {
+    expect(telegramProfile(signed({ id: "42" }))).toBeNull();
+    expect(telegramProfile(signed({ id: "42", auth_date: "soon" }))).toBeNull();
   });
 
   it("rejects everything when the bot is not configured", () => {

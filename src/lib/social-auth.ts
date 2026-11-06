@@ -106,9 +106,12 @@ export async function googleProfile(code: string): Promise<Profile> {
 
 /**
  * Check a Telegram Login Widget redirect: hash = HMAC-SHA256(data-check-string, SHA256(bot token)),
- * and refuse logins older than a day (replayed links).
+ * and refuse logins older than an hour [review L-5]: a signed login link works for anyone who has it,
+ * so a short window limits replay (login CSRF).
  * https://core.telegram.org/widgets/login#checking-authorization
  */
+const TELEGRAM_MAX_AGE_SEC = 60 * 60;
+
 export function telegramProfile(params: URLSearchParams): Profile | null {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const hash = params.get("hash");
@@ -122,7 +125,8 @@ export function telegramProfile(params: URLSearchParams): Profile | null {
   const expected = createHmac("sha256", secret).update(checkString).digest();
   const given = Buffer.from(hash, "hex");
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) return null;
-  if (Date.now() / 1000 - Number(params.get("auth_date")) > 24 * 60 * 60) return null;
+  const age = Date.now() / 1000 - Number(params.get("auth_date"));
+  if (!Number.isFinite(age) || age > TELEGRAM_MAX_AGE_SEC) return null;
   const name = [params.get("first_name"), params.get("last_name")].filter(Boolean).join(" ") || params.get("username") || "";
   return { provider: "telegram", id: params.get("id")!, name };
 }

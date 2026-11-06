@@ -22,6 +22,8 @@ export function normalizePhone(raw: string) {
 export async function createSession(userId: string) {
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
+  // Expired sessions are never used again; drop this user's on each sign-in [review L-6]
+  await prisma.session.deleteMany({ where: { userId, expiresAt: { lt: new Date() } } });
   await prisma.session.create({
     data: { tokenHash: hashToken(token), userId, expiresAt },
   });

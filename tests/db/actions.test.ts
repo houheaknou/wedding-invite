@@ -134,3 +134,24 @@ describe("public RSVP [review S-2, M-4]", () => {
     expect(await submitRsvp(inv.shareId, null, undefined, reply(1))).toEqual({ error: "closed" });
   });
 });
+
+describe("sessions [review L-6]", () => {
+  it("signing in removes the user's expired sessions, keeps live ones and other users'", async () => {
+    const a = await userWithEvent("a@example.com");
+    const b = await userWithEvent("b@example.com");
+    const past = new Date(Date.now() - 60_000);
+    const future = new Date(Date.now() + 86_400_000);
+    await prisma.session.createMany({
+      data: [
+        { userId: a.user.id, tokenHash: "a-old", expiresAt: past },
+        { userId: a.user.id, tokenHash: "a-live", expiresAt: future },
+        { userId: b.user.id, tokenHash: "b-old", expiresAt: past },
+      ],
+    });
+    await signIn("a@example.com");
+    const left = (await prisma.session.findMany({ select: { tokenHash: true } })).map((s) => s.tokenHash);
+    expect(left).not.toContain("a-old");
+    expect(left).toEqual(expect.arrayContaining(["a-live", "b-old"]));
+    expect(left).toHaveLength(3); // + the new session
+  });
+});
