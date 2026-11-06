@@ -9,6 +9,7 @@ import type { InviteLang, TemplateId } from "@/lib/invitation";
 import { resolveMapEmbed } from "@/lib/map-embed";
 import { ensureInvitation, photoUrls } from "@/lib/media";
 import { TemplateEditor } from "@/components/TemplateEditor";
+import { pick, TEMPLATE_EDITOR_KEYS } from "@/lib/ui-keys";
 
 export default async function TemplatePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -27,7 +28,7 @@ export default async function TemplatePage({ params }: { params: Promise<{ id: s
   return (
     <TemplateEditor
       action={saveInvitation.bind(null, id)}
-      t={t}
+      t={pick(t, TEMPLATE_EDITOR_KEYS)}
       shareId={inv.shareId}
       gallery={gallery.map((g) => ({ id: g.id, url: `/api/events/${id}/gallery/${g.id}` }))}
       addGalleryPhoto={addGalleryPhoto.bind(null, id)}

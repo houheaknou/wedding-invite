@@ -7,7 +7,7 @@ import { useCloseModal } from "@/components/Modal";
 import { SubmitButton } from "@/components/SubmitButton";
 import { btnPrimary, ErrorText, Field, inputCls } from "@/components/ui";
 import { CATEGORY_STYLE, CURRENCIES, EXPENSE_CATEGORIES, formatMoney } from "@/lib/expenses";
-import type { Dict } from "@/lib/i18n";
+import type { ExpenseFormsDict } from "@/lib/ui-keys";
 
 /** Plain (serialisable) expense for the edit form */
 export type ExpenseRow = {
@@ -35,7 +35,7 @@ export function ExpenseForm({
   defaultGroup,
 }: {
   action: Action;
-  t: Dict;
+  t: ExpenseFormsDict;
   expense?: ExpenseRow;
   currency: string;
   /** existing group names, suggested in the Group field */
@@ -131,7 +131,7 @@ export function ExpenseForm({
 }
 
 /** Budget + currency, saved together */
-export function BudgetForm({ action, t, budget, currency }: { action: Action; t: Dict; budget: number | null; currency: string }) {
+export function BudgetForm({ action, t, budget, currency }: { action: Action; t: ExpenseFormsDict; budget: number | null; currency: string }) {
   const [state, formAction] = useActionState(action, undefined);
   const closeModal = useCloseModal();
   useEffect(() => {

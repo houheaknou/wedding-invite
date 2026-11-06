@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getDict } from "@/lib/i18n";
 import { AuthForm } from "@/components/AuthForm";
 import { SocialLogin } from "@/components/SocialLogin";
+import { pick, AUTH_KEYS } from "@/lib/ui-keys";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
@@ -12,7 +13,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <h1 className="text-2xl font-bold text-brand-700">{t.login}</h1>
         <p className="mt-1 text-sm text-stone-500">{t.loginSubtitle}</p>
       </div>
-      <AuthForm mode="login" t={t} />
+      <AuthForm mode="login" t={pick(t, AUTH_KEYS)} />
       <SocialLogin t={t} error={error} />
       <p className="text-center text-sm text-stone-600">
         {t.noAccount}{" "}

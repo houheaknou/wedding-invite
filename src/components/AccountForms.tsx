@@ -6,7 +6,7 @@ import { changePassword, updateProfile } from "@/actions/account";
 import { PasswordInput } from "@/components/PasswordInput";
 import { SubmitButton } from "@/components/SubmitButton";
 import { card, ErrorText, Field, inputCls } from "@/components/ui";
-import type { Dict } from "@/lib/i18n";
+import type { AccountDict } from "@/lib/ui-keys";
 
 type Profile = { name: string; email: string | null; phone: string | null };
 
@@ -14,7 +14,7 @@ const Done = ({ children }: { children: React.ReactNode }) => (
   <p className="rounded-2xl bg-emerald-50 px-4 py-2 text-sm text-emerald-700">{children}</p>
 );
 
-export function ProfileForm({ user, t }: { user: Profile; t: Dict }) {
+export function ProfileForm({ user, t }: { user: Profile; t: AccountDict }) {
   const [state, action] = useActionState(updateProfile, undefined);
   return (
     <form action={action} className={`${card} space-y-4`}>
@@ -42,7 +42,7 @@ export function ProfileForm({ user, t }: { user: Profile; t: Dict }) {
 }
 
 /** `hasPassword` false: a Google/Telegram account setting its first password (no current one to ask for). */
-export function PasswordForm({ t, hasPassword }: { t: Dict; hasPassword: boolean }) {
+export function PasswordForm({ t, hasPassword }: { t: AccountDict; hasPassword: boolean }) {
   // React resets the form after the action runs, so the password fields clear on their own
   const [state, action] = useActionState(changePassword, undefined);
   const title = hasPassword ? t.changePassword : t.setPassword;

@@ -3,6 +3,7 @@ import { requireOwnedEvent } from "@/lib/auth";
 import { getDict } from "@/lib/i18n";
 import { ownerInvitationData } from "@/lib/owner-invitation";
 import { TemplateStore } from "@/components/TemplateStore";
+import { pick, TEMPLATE_STORE_KEYS } from "@/lib/ui-keys";
 
 export default async function TemplatesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -11,7 +12,7 @@ export default async function TemplatesPage({ params }: { params: Promise<{ id: 
   const data = await ownerInvitationData(id);
   return (
     <TemplateStore
-      t={t}
+      t={pick(t, TEMPLATE_STORE_KEYS)}
       data={data}
       current={data.template}
       editHref={`/events/${id}/template`}

@@ -11,6 +11,7 @@ import { BudgetForm, ExpenseForm, type ExpenseRow } from "@/components/ExpenseFo
 import { ImportForm } from "@/components/ImportForm";
 import { Modal } from "@/components/Modal";
 import { btnIcon, btnPrimary, btnSecondary, card } from "@/components/ui";
+import { pick, EXPENSE_FORMS_KEYS, IMPORT_FORM_KEYS } from "@/lib/ui-keys";
 
 /** Bar colours for group breakdown (groups have no fixed colour) */
 const GROUP_BARS = ["bg-amber-400", "bg-rose-400", "bg-sky-400", "bg-emerald-400", "bg-violet-400", "bg-orange-400", "bg-teal-400", "bg-pink-400"];
@@ -156,7 +157,7 @@ export default async function ExpensesPage({
             </>
           }
         >
-          <ExpenseForm action={updateExpense.bind(null, id, e.id)} t={t} expense={e} currency={currency} groups={groupNames} />
+          <ExpenseForm action={updateExpense.bind(null, id, e.id)} t={pick(t, EXPENSE_FORMS_KEYS)} expense={e} currency={currency} groups={groupNames} />
           <div className="mt-4 flex justify-start border-t border-stone-100 pt-3">
             <ConfirmButton action={deleteExpense.bind(null, id, e.id)} confirm={t.confirmDelete} className={`${btnSecondary} px-3 py-1.5 text-xs text-red-600 hover:border-red-200 hover:bg-red-50`}>
               <Trash2 className="size-3.5" />
@@ -184,7 +185,7 @@ export default async function ExpensesPage({
               </>
             }
           >
-            <ImportForm action={importExpenses.bind(null, id)} t={t} help={t.importExpensesHelp} templateHref={`${exportBase}?format=xlsx&template=1`}>
+            <ImportForm action={importExpenses.bind(null, id)} t={pick(t, IMPORT_FORM_KEYS)} help={t.importExpensesHelp} templateHref={`${exportBase}?format=xlsx&template=1`}>
               <label className="flex items-start gap-2 rounded-2xl bg-stone-50 px-4 py-3 text-sm text-stone-700">
                 <input type="checkbox" name="replace" className="mt-1 size-4 accent-brand-600" />
                 <span>{t.importReplace}</span>
@@ -221,7 +222,7 @@ export default async function ExpensesPage({
               </>
             }
           >
-            <ExpenseForm action={addExpense.bind(null, id)} t={t} currency={currency} groups={groupNames} />
+            <ExpenseForm action={addExpense.bind(null, id)} t={pick(t, EXPENSE_FORMS_KEYS)} currency={currency} groups={groupNames} />
           </Modal>
         </div>
       </div>
@@ -248,7 +249,7 @@ export default async function ExpensesPage({
                 </>
               }
             >
-              <BudgetForm action={updateBudget.bind(null, id)} t={t} budget={budget} currency={currency} />
+              <BudgetForm action={updateBudget.bind(null, id)} t={pick(t, EXPENSE_FORMS_KEYS)} budget={budget} currency={currency} />
             </Modal>
           </div>
           {budget === null ? (
@@ -385,7 +386,7 @@ export default async function ExpensesPage({
                     >
                       <ExpenseForm
                         action={addExpense.bind(null, id)}
-                        t={t}
+                        t={pick(t, EXPENSE_FORMS_KEYS)}
                         currency={currency}
                         groups={groupNames}
                         defaultGroup={s.name && s.name !== t.noGroup ? s.name : undefined}

@@ -14,6 +14,7 @@ import { GiftForm } from "@/components/GiftForms";
 import { ImportForm } from "@/components/ImportForm";
 import { Modal } from "@/components/Modal";
 import { btnSecondary, card, chip, inputCls } from "@/components/ui";
+import { pick, GIFT_FORMS_KEYS, IMPORT_FORM_KEYS } from "@/lib/ui-keys";
 
 /** "$1,250 + 500,000 ៛" — the two currencies are never added together */
 const both = (usd: number, khr: number) => [usd || !khr ? formatMoney(usd, "USD") : "", khr ? formatMoney(khr, "KHR") : ""].filter(Boolean).join(" + ");
@@ -80,7 +81,7 @@ export default async function GiftsPage({ params, searchParams }: { params: Prom
               </>
             }
           >
-            <ImportForm action={importGifts.bind(null, id)} t={t} help={t.importGiftsHelp} templateHref={`${exportBase}?format=xlsx&template=1`}>
+            <ImportForm action={importGifts.bind(null, id)} t={pick(t, IMPORT_FORM_KEYS)} help={t.importGiftsHelp} templateHref={`${exportBase}?format=xlsx&template=1`}>
               <label className="flex items-start gap-2 rounded-2xl bg-stone-50 px-4 py-3 text-sm text-stone-700">
                 <input type="checkbox" name="replace" className="mt-1 size-4 accent-brand-600" />
                 <span>{t.importReplaceGifts}</span>
@@ -141,7 +142,7 @@ export default async function GiftsPage({ params, searchParams }: { params: Prom
           <span className="flex size-7 items-center justify-center rounded-full bg-brand-50 text-base">🧧</span>
           {t.addGift}
         </h2>
-        <GiftForm action={addGift.bind(null, id)} t={t} guests={guests} given={given} />
+        <GiftForm action={addGift.bind(null, id)} t={pick(t, GIFT_FORMS_KEYS)} guests={guests} given={given} />
       </section>
 
       {/* List */}
@@ -206,7 +207,7 @@ export default async function GiftsPage({ params, searchParams }: { params: Prom
                       </>
                     }
                   >
-                    <GiftForm action={updateGift.bind(null, id, g.id)} t={t} gift={g} guests={guests} given={given} />
+                    <GiftForm action={updateGift.bind(null, id, g.id)} t={pick(t, GIFT_FORMS_KEYS)} gift={g} guests={guests} given={given} />
                     <div className="mt-4 flex justify-start border-t border-stone-100 pt-3">
                       <ConfirmButton
                         action={deleteGift.bind(null, id, g.id)}

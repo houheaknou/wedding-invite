@@ -7,7 +7,7 @@ import type { FormState } from "@/actions/auth";
 import { SubmitButton } from "@/components/SubmitButton";
 import { btnPrimary, btnSecondary, ErrorText, Field, inputCls, textareaCls } from "@/components/ui";
 import { EVENT_TYPES } from "@/lib/constants";
-import type { Dict } from "@/lib/i18n";
+import type { EventFormDict } from "@/lib/ui-keys";
 
 export type EventDefaults = {
   title?: string | null;
@@ -32,7 +32,7 @@ export function EventForm({
   submitLabel,
 }: {
   action: (state: FormState, fd: FormData) => Promise<FormState>;
-  t: Dict;
+  t: EventFormDict;
   defaults?: EventDefaults;
   cancelHref: string;
   submitLabel: string;

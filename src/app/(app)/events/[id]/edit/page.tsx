@@ -4,6 +4,7 @@ import { getDict } from "@/lib/i18n";
 import { coverUrl, toLocalInputValue } from "@/lib/format";
 import { EventForm } from "@/components/EventForm";
 import { card } from "@/components/ui";
+import { pick, EVENT_FORM_KEYS } from "@/lib/ui-keys";
 
 export default async function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -15,7 +16,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
       <h1 className="mb-4 text-xl font-bold">{t.editEvent}</h1>
       <EventForm
         action={updateEvent.bind(null, id)}
-        t={t}
+        t={pick(t, EVENT_FORM_KEYS)}
         cancelHref={`/events/${id}`}
         submitLabel={t.save}
         defaults={{ ...event, date, time, coverUrl: coverUrl(event) }}

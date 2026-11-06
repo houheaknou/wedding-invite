@@ -6,7 +6,7 @@ import { login, register } from "@/actions/auth";
 import { PasswordInput } from "@/components/PasswordInput";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ErrorText, Field } from "@/components/ui";
-import type { Dict } from "@/lib/i18n";
+import type { AuthDict } from "@/lib/ui-keys";
 
 /** Soft ivory pill with a gold outline; left padding leaves room for the icon badge */
 const authInput =
@@ -30,7 +30,7 @@ function IconInput({ icon, ...props }: React.InputHTMLAttributes<HTMLInputElemen
   );
 }
 
-export function AuthForm({ mode, t }: { mode: "login" | "register"; t: Dict }) {
+export function AuthForm({ mode, t }: { mode: "login" | "register"; t: AuthDict }) {
   const [state, action] = useActionState(mode === "login" ? login : register, undefined);
   return (
     <form action={action} className="space-y-4">

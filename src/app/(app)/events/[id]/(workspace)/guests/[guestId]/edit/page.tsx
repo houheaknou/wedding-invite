@@ -5,6 +5,7 @@ import { requireOwnedEvent } from "@/lib/auth";
 import { getDict } from "@/lib/i18n";
 import { GuestForm } from "@/components/GuestForm";
 import { Avatar, card } from "@/components/ui";
+import { pick, GUEST_FORM_KEYS } from "@/lib/ui-keys";
 
 export default async function EditGuestPage({
   params,
@@ -22,7 +23,7 @@ export default async function EditGuestPage({
         <Avatar name={guest.name} className="size-10 text-sm" />
         <h1 className="text-xl font-bold">{t.editGuest}</h1>
       </div>
-      <GuestForm action={updateGuest.bind(null, id, guestId)} t={t} guest={guest} cancelHref={`/events/${id}/guests`} />
+      <GuestForm action={updateGuest.bind(null, id, guestId)} t={pick(t, GUEST_FORM_KEYS)} guest={guest} cancelHref={`/events/${id}/guests`} />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { googleEnabled } from "@/lib/social-auth";
 import { getDict } from "@/lib/i18n";
 import { PasswordForm, ProfileForm } from "@/components/AccountForms";
 import { Avatar } from "@/components/ui";
+import { pick, ACCOUNT_KEYS } from "@/lib/ui-keys";
 
 export async function generateMetadata() {
   const { t } = await getDict();
@@ -62,8 +63,8 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         </div>
       )}
       <div className="grid gap-4 md:grid-cols-2 md:items-start">
-        <ProfileForm user={{ name: user.name, email: user.email, phone: user.phone }} t={t} />
-        <PasswordForm t={t} hasPassword={Boolean(user.passwordHash)} />
+        <ProfileForm user={{ name: user.name, email: user.email, phone: user.phone }} t={pick(t, ACCOUNT_KEYS)} />
+        <PasswordForm t={pick(t, ACCOUNT_KEYS)} hasPassword={Boolean(user.passwordHash)} />
       </div>
     </div>
   );

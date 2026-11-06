@@ -9,7 +9,7 @@ import { GuestPicker, type PickGuest } from "@/components/GuestPicker";
 import { SubmitButton } from "@/components/SubmitButton";
 import { btnPrimary, ErrorText, Field, inputCls } from "@/components/ui";
 import { GIFT_SIDES, type GiftRow } from "@/lib/gifts";
-import type { Dict } from "@/lib/i18n";
+import type { GiftFormsDict } from "@/lib/ui-keys";
 
 type Action = (state: FormState, fd: FormData) => Promise<FormState>;
 
@@ -31,7 +31,7 @@ function Pill({ children, ...radio }: React.InputHTMLAttributes<HTMLInputElement
   );
 }
 
-const METHOD_PILL: Record<GiftMethod, { icon: typeof Banknote; label: (t: Dict) => string }> = {
+const METHOD_PILL: Record<GiftMethod, { icon: typeof Banknote; label: (t: GiftFormsDict) => string }> = {
   CASH: { icon: Banknote, label: (t) => t.method_CASH },
   BANK: { icon: QrCode, label: (t) => t.method_BANK },
   OTHER: { icon: CircleEllipsis, label: (t) => t.method_OTHER },
@@ -49,7 +49,7 @@ export function GiftForm({
   given,
 }: {
   action: Action;
-  t: Dict;
+  t: GiftFormsDict;
   gift?: GiftRow;
   /** the event's guest list, offered in the name field */
   guests: PickGuest[];

@@ -5,7 +5,7 @@ import type { GuestSide } from "@prisma/client";
 import { Check, ChevronDown, Phone, UserPlus, X } from "lucide-react";
 import { Avatar, chip, inputCls } from "@/components/ui";
 import { SIDE_CHIP } from "@/lib/constants";
-import type { Dict } from "@/lib/i18n";
+import type { GuestPickerDict } from "@/lib/ui-keys";
 
 export type PickGuest = { id: string; name: string; side: GuestSide; group: string | null; phone: string | null };
 
@@ -28,7 +28,7 @@ export function GuestPicker({
   value: string;
   onChange: (name: string) => void;
   onPick: (guest: PickGuest) => void;
-  t: Dict;
+  t: GuestPickerDict;
   inputRef?: React.Ref<HTMLInputElement>;
 }) {
   const [open, setOpen] = useState(false);

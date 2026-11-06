@@ -9,7 +9,7 @@ import { useCloseModal } from "@/components/Modal";
 import { SubmitButton } from "@/components/SubmitButton";
 import { btnPrimary, btnSecondary, ErrorText, Field, inputCls } from "@/components/ui";
 import { SIDES, STATUSES } from "@/lib/constants";
-import type { Dict } from "@/lib/i18n";
+import type { GuestFormDict } from "@/lib/ui-keys";
 
 export function GuestForm({
   action,
@@ -18,7 +18,7 @@ export function GuestForm({
   cancelHref,
 }: {
   action: (state: FormState, fd: FormData) => Promise<FormState>;
-  t: Dict;
+  t: GuestFormDict;
   guest?: Guest;
   cancelHref?: string;
 }) {

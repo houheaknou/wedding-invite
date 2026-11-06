@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Check, Eye, Pencil, Sparkles, Users } from "lucide-react";
 import { InvitationView } from "@/components/InvitationView";
 import { Modal } from "@/components/Modal";
-import type { Dict } from "@/lib/i18n";
+import type { TemplateStoreDict } from "@/lib/ui-keys";
 import { TEMPLATES, type InvitationData, type TemplateId } from "@/lib/invitation";
 
 /**
@@ -19,7 +19,7 @@ export function TemplateStore({
   editHref,
   choose,
 }: {
-  t: Dict;
+  t: TemplateStoreDict;
   data: InvitationData;
   current: TemplateId;
   editHref: string;

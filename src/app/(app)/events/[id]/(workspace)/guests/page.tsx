@@ -17,6 +17,7 @@ import { ImportForm } from "@/components/ImportForm";
 import { Modal } from "@/components/Modal";
 import { PageSizeSelect } from "@/components/PageSizeSelect";
 import { Avatar, btnIcon, btnPrimary, btnSecondary, card, chip } from "@/components/ui";
+import { pick, GUEST_FORM_KEYS, IMPORT_FORM_KEYS } from "@/lib/ui-keys";
 
 type SearchParams = { q?: string; group?: string; side?: string; status?: string; page?: string; size?: string };
 
@@ -155,7 +156,7 @@ export default async function GuestsPage({
                 </>
               }
             >
-              <ImportForm action={importGuests.bind(null, id)} t={t} templateHref={`${exportBase}?format=xlsx&template=1`} />
+              <ImportForm action={importGuests.bind(null, id)} t={pick(t, IMPORT_FORM_KEYS)} templateHref={`${exportBase}?format=xlsx&template=1`} />
             </Modal>
             <Dropdown
               summaryClassName={`${btnSecondary} px-4`}
@@ -187,7 +188,7 @@ export default async function GuestsPage({
                 </>
               }
             >
-              <GuestForm action={addGuest.bind(null, id)} t={t} />
+              <GuestForm action={addGuest.bind(null, id)} t={pick(t, GUEST_FORM_KEYS)} />
             </Modal>
           </div>
         </div>

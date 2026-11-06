@@ -5,7 +5,7 @@ import { FileSpreadsheet, Upload } from "lucide-react";
 import type { ImportState } from "@/actions/guests";
 import { SubmitButton } from "@/components/SubmitButton";
 import { btnPrimary, ErrorText } from "@/components/ui";
-import type { Dict } from "@/lib/i18n";
+import type { ImportFormDict } from "@/lib/ui-keys";
 
 export function ImportForm({
   action,
@@ -15,7 +15,7 @@ export function ImportForm({
   children,
 }: {
   action: (state: ImportState, fd: FormData) => Promise<ImportState>;
-  t: Dict;
+  t: ImportFormDict;
   templateHref: string;
   /** replaces the guest-list help text */
   help?: string;

@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import type { GalleryResult } from "@/actions/gallery";
 import { GALLERY_MAX } from "@/lib/constants";
-import type { Dict } from "@/lib/i18n";
+import type { GalleryDict } from "@/lib/ui-keys";
 
 export type GalleryItem = { id: string; url: string };
 
@@ -39,7 +39,7 @@ export function GalleryManager({
   add: (fd: FormData) => Promise<GalleryResult>;
   remove: (photoId: string) => Promise<void>;
   onChange: (urls: string[]) => void;
-  t: Dict;
+  t: GalleryDict;
 }) {
   const [items, setItems] = useState(initial);
   const [busy, setBusy] = useState(0);

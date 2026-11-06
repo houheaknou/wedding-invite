@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getDict } from "@/lib/i18n";
 import { AuthForm } from "@/components/AuthForm";
 import { SocialLogin } from "@/components/SocialLogin";
+import { pick, AUTH_KEYS } from "@/lib/ui-keys";
 
 export default async function RegisterPage() {
   const { t } = await getDict();
@@ -11,7 +12,7 @@ export default async function RegisterPage() {
         <h1 className="text-2xl font-bold text-brand-700">{t.register}</h1>
         <p className="mt-1 text-sm text-stone-500">{t.registerSubtitle}</p>
       </div>
-      <AuthForm mode="register" t={t} />
+      <AuthForm mode="register" t={pick(t, AUTH_KEYS)} />
       <SocialLogin t={t} />
       <p className="text-center text-sm text-stone-600">
         {t.haveAccount}{" "}

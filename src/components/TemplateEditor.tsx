@@ -30,7 +30,7 @@ import { ErrorText } from "@/components/ui";
 import { serializeAgenda, type ProgrammeDay } from "@/lib/agenda";
 import { royalFontVars } from "@/lib/invite-fonts";
 import { publicUrl } from "@/lib/public-url";
-import type { Dict } from "@/lib/i18n";
+import type { TemplateEditorDict } from "@/lib/ui-keys";
 import {
   BACKGROUNDS,
   FONT_STYLES,
@@ -171,7 +171,7 @@ export function TemplateEditor({
   deleteGalleryPhoto,
 }: {
   action: (state: SaveState, fd: FormData) => Promise<SaveState>;
-  t: Dict;
+  t: TemplateEditorDict;
   initial: BuilderState;
   media: BuilderMedia;
   shareId: string;
