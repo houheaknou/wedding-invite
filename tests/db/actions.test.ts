@@ -155,3 +155,13 @@ describe("sessions [review L-6]", () => {
     expect(left).toHaveLength(3); // + the new session
   });
 });
+
+describe("currency columns [review L-8]", () => {
+  it("accept USD and KHR only", async () => {
+    const { event } = await userWithEvent("a@example.com");
+    await prisma.event.update({ where: { id: event.id }, data: { currency: "KHR" } });
+    await expect(prisma.event.update({ where: { id: event.id }, data: { currency: "EUR" } })).rejects.toThrow(/check/i);
+    await expect(prisma.gift.create({ data: { eventId: event.id, name: "A", amount: 10, currency: "usd" } })).rejects.toThrow(/check/i);
+    await prisma.gift.create({ data: { eventId: event.id, name: "A", amount: 10, currency: "USD" } });
+  });
+});

@@ -73,7 +73,7 @@ model Event {
   /// Wedding budget for the Expenses tab, in `currency`
   budget         Decimal?       @db.Decimal(14, 2)
   /// "USD" or "KHR" — all of the event's expense amounts use it
-  currency       String         @default("USD")
+  currency       String         @default("USD") /// "USD" | "KHR" (CHECK constraint, migration currency_check)
   /// Riel per dollar, to put $ and ៛ gifts and expenses together on the dashboard (income vs expenses)
   exchangeRate   Int            @default(4000)
 
@@ -282,7 +282,7 @@ model Gift {
   name      String
   amount    Decimal    @db.Decimal(14, 2)
   /// "USD" or "KHR"
-  currency  String     @default("USD")
+  currency  String     @default("USD") /// "USD" | "KHR" (CHECK constraint, migration currency_check)
   side      GuestSide  @default(BOTH)
   method    GiftMethod @default(CASH)
   notes     String?
