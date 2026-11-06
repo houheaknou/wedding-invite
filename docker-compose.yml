@@ -1,19 +1,23 @@
+# Local development database. (Production stack: docker-compose.prod.yml.)
+# Credentials come from .env (POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB) with the old values as
+# defaults. Postgres applies them only when it first creates the data volume; to change the password of
+# an existing database see "Database password" in README.md.
 services:
   db:
     image: postgres:16-alpine
     container_name: wedding-invite-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: wedding
-      POSTGRES_PASSWORD: wedding
-      POSTGRES_DB: wedding_invite
+      POSTGRES_USER: ${POSTGRES_USER:-wedding}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-wedding}
+      POSTGRES_DB: ${POSTGRES_DB:-wedding_invite}
     ports:
-      # 5434 on the host so it doesn't clash with a locally installed Postgres on 5432
-      - "5434:5432"
+      # This PC only (not the LAN/Wi-Fi) [review M-1]; 5434 so it doesn't clash with a local Postgres on 5432
+      - "127.0.0.1:5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U wedding -d wedding_invite"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10

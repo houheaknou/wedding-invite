@@ -29,8 +29,23 @@ The seed creates a demo account `demo@example.com` / `demo12345`
 (override with `SEED_EMAIL` / `SEED_PASSWORD`) with one event and 8 guests.
 Re-running the seed resets that account's events.
 
-Postgres is published on **5434**, not 5432, so it doesn't collide with a
-locally installed Postgres. Change both `docker-compose.yml` and `.env` if needed.
+Postgres is published on **127.0.0.1:5434** — this computer only, not the
+LAN/Wi-Fi — and not 5432, so it doesn't collide with a locally installed
+Postgres. Change both `docker-compose.yml` and `.env` if needed.
+
+### Database password
+
+`POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` in `.env` are used only
+when the data volume is **first created**; changing them later does not change
+an existing database. To change the password of the existing one (no data is
+touched):
+
+```bash
+docker exec -it wedding-invite-db psql -U wedding -d wedding_invite -c "ALTER USER wedding PASSWORD 'new-long-random-password'"
+```
+
+then put the same password in `.env` — in both `POSTGRES_PASSWORD` and
+`DATABASE_URL` — and restart `npm run dev`.
 
 After pulling schema changes, run `npx prisma migrate dev` and **restart
 `npm run dev`**. On Windows the running dev server locks Prisma's engine DLL, so
