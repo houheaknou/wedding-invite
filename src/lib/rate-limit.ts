@@ -21,26 +21,31 @@ export async function clientIp() {
   ).slice(0, 64);
 }
 
-const secondsLeft = (resetAt: Date) => Math.max(1, Math.ceil((resetAt.getTime() - Date.now()) / 1000));
+// Seconds left in the window, measured on the database clock only: the app server's clock can
+// differ from Postgres' (Docker VMs drift by a second or so), and windows are set with now().
+type Row = { count: number; left: number };
+// (-1 ms: "resetAt" is stored rounded to milliseconds, which can put it a hair past the window)
+const secondsLeft = (row: Row) => Math.max(1, Math.ceil(row.left - 0.001));
 
 /** Count one attempt for `key`; ok while the window's count is ≤ `max`. */
 export async function hit(key: string, max: number, windowSec: number): Promise<Limit> {
-  const [row] = await prisma.$queryRaw<{ count: number; resetAt: Date }[]>`
+  const [row] = await prisma.$queryRaw<Row[]>`
     INSERT INTO "RateLimit" ("key", "count", "resetAt")
     VALUES (${key}, 1, now() + make_interval(secs => ${windowSec}))
     ON CONFLICT ("key") DO UPDATE SET
       "count"   = CASE WHEN "RateLimit"."resetAt" <= now() THEN 1 ELSE "RateLimit"."count" + 1 END,
       "resetAt" = CASE WHEN "RateLimit"."resetAt" <= now() THEN now() + make_interval(secs => ${windowSec}) ELSE "RateLimit"."resetAt" END
-    RETURNING "count", "resetAt"`;
+    RETURNING "count", extract(epoch from "resetAt" - now())::float8 AS "left"`;
   if (Math.random() < 0.02) void sweep();
-  return { ok: row.count <= max, retryAfterSec: secondsLeft(row.resetAt) };
+  return { ok: row.count <= max, retryAfterSec: secondsLeft(row) };
 }
 
 /** Whether `key` is already over `max` in its current window (does not count an attempt). */
 export async function peek(key: string, max: number): Promise<Limit> {
-  const [row] = await prisma.$queryRaw<{ count: number; resetAt: Date }[]>`
-    SELECT "count", "resetAt" FROM "RateLimit" WHERE "key" = ${key} AND "resetAt" > now()`;
-  return row && row.count >= max ? { ok: false, retryAfterSec: secondsLeft(row.resetAt) } : { ok: true, retryAfterSec: 0 };
+  const [row] = await prisma.$queryRaw<Row[]>`
+    SELECT "count", extract(epoch from "resetAt" - now())::float8 AS "left"
+    FROM "RateLimit" WHERE "key" = ${key} AND "resetAt" > now()`;
+  return row && row.count >= max ? { ok: false, retryAfterSec: secondsLeft(row) } : { ok: true, retryAfterSec: 0 };
 }
 
 /** Forget `key` (e.g. after a successful login). */
