@@ -1,0 +1,234 @@
+/* "Olive classic": cream linen paper, olive-gold double-ruled cards, line-drawn flower corners. */
+.root {
+  --olive: #a39b2d;
+  --olive-dark: #4f4c18;
+  --olive-line: color-mix(in srgb, #a39b2d 55%, transparent);
+  --ink: #5a5522;
+  --km-display: var(--font-moul), serif;
+  --km-body: var(--font-noto-sans-khmer), sans-serif;
+  --latin: var(--font-cormorant), serif;
+  position: relative;
+  padding: 16px 14px 70px;
+  color: var(--ink);
+  font-family: var(--km-body);
+  line-height: 1.75;
+  text-align: center;
+  /* linen texture */
+  background-color: #f1eedb;
+  background-image: repeating-linear-gradient(0deg, rgba(120, 110, 60, 0.05) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(120, 110, 60, 0.05) 0 1px, transparent 1px 4px);
+}
+.root p, .root h1, .root h2, .root h3 { margin: 0; }
+
+/* double-ruled card */
+.card {
+  position: relative; margin: 0 auto 18px; padding: 34px 20px 30px;
+  border: 1px solid var(--olive-line);
+  outline: 1px solid color-mix(in srgb, var(--olive) 35%, transparent); outline-offset: -7px;
+  background: rgba(250, 248, 236, 0.55);
+  scroll-margin-top: 10px;
+  animation: rise 0.8s ease both;
+}
+.flower { position: absolute; width: 74px; height: 74px; color: var(--olive); pointer-events: none; }
+.flowerTl { top: -10px; left: -10px; }
+.flowerBr { bottom: -10px; right: -10px; transform: rotate(180deg); }
+
+.title { font: 400 19px/1.9 var(--km-display); color: var(--olive); }
+.ornament { display: block; margin: 8px auto 4px; color: var(--olive); }
+.label { font: 400 11.5px var(--km-body); color: color-mix(in srgb, var(--ink) 70%, transparent); }
+.names { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 8px; margin: 26px 0 14px; }
+.name { font: 400 21px/1.7 var(--km-display); color: var(--olive-dark); }
+.nameEn { font: italic 500 15px var(--latin); color: var(--olive); }
+.heart { color: var(--olive); font-size: 18px; margin-bottom: 12px; animation: beat 1.8s ease-in-out infinite; }
+.dateBold { font: 600 15px/1.8 var(--km-body); color: var(--olive-dark); }
+.lunar { font: 400 12.5px/1.7 var(--km-body); color: color-mix(in srgb, var(--ink) 80%, transparent); }
+
+.count { display: flex; justify-content: center; gap: 10px; margin-top: 14px; }
+.count div { min-width: 58px; padding: 6px 4px; border: 1px solid var(--olive-line); background: rgba(255, 253, 243, 0.6); }
+.count b { display: block; font: 400 21px/1.5 var(--km-display); color: var(--olive-dark); font-variant-numeric: tabular-nums; }
+.count span { font-size: 10.5px; }
+
+/* invitation card */
+.parents { display: flex; justify-content: space-between; gap: 12px; text-align: left; font: 500 12.5px/1.9 var(--km-body); white-space: pre-line; }
+.invite { margin-top: 18px !important; font: 400 19px/1.9 var(--km-display); color: var(--olive); }
+.guest { font: 600 14px var(--km-body); color: var(--olive-dark); }
+.wording { margin-top: 6px !important; font-size: 13px; line-height: 2; white-space: pre-line; }
+.when { margin-top: 10px !important; font: 600 13px/1.9 var(--km-body); color: var(--olive-dark); }
+.where { font-size: 13px; line-height: 1.9; white-space: pre-line; }
+.thanks { margin-top: 12px !important; font: 400 21px/1.9 var(--km-display); color: var(--olive); }
+
+/* programme */
+.dayHead { margin: 22px 0 6px !important; font: 600 13.5px var(--km-body); font-family: var(--latin), var(--km-body); color: var(--olive-dark); }
+.row { display: grid; grid-template-columns: 76px 1fr; gap: 12px; padding: 8px 4px; text-align: left; font-size: 13px; border-bottom: 1px dashed var(--olive-line); }
+.time { text-align: center; line-height: 1.3; }
+.time b { display: block; font: 600 13.5px var(--km-body); color: var(--olive-dark); }
+.time small { font-size: 10.5px; color: color-mix(in srgb, var(--ink) 65%, transparent); }
+
+/* venue map */
+.plan { position: relative; margin-top: 14px; border: 1px solid var(--olive-line); background: #faf8ec; }
+.plan img { display: block; width: 100%; height: auto; }
+.plan iframe { display: block; width: 100%; height: 210px; border: 0; filter: sepia(0.3) saturate(0.8); }
+.qr { position: absolute; left: 10px; bottom: 10px; width: 78px; padding: 4px; background: #fffdf3; border: 1px solid var(--olive-line); font-size: 8.5px; line-height: 1.3; }
+.qr div svg { width: 100%; height: auto; display: block; }
+.hint { margin-top: 8px !important; font-size: 11.5px; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+.btns { display: flex; justify-content: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.btn, .btnOutline {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 99px; cursor: pointer; text-decoration: none;
+  font: 600 12.5px var(--km-body); transition: transform 0.2s;
+}
+.btn { border: 0; background: var(--olive); color: #fffdf3; }
+.btnOutline { border: 1px solid var(--olive); background: rgba(255, 253, 243, 0.6); color: var(--olive-dark); }
+.btn:hover, .btnOutline:hover { transform: translateY(-1px); }
+.btn:disabled { opacity: 0.7; cursor: default; }
+.contactsTitle { margin-top: 20px !important; font: 400 16px/1.9 var(--km-display); color: var(--olive); }
+.phones { display: grid; gap: 4px; margin-top: 6px; }
+.phones a { font: 700 17px var(--km-body); color: var(--olive-dark); text-decoration: none; letter-spacing: 0.03em; }
+.signature { margin-top: 10px !important; font: 400 30px/1.6 var(--km-display); color: var(--olive); }
+.signature span { font-size: 18px; margin: 0 4px; vertical-align: middle; }
+
+/* gallery */
+.gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.gallery img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border: 3px solid #fffdf3; box-shadow: 0 0 0 1px var(--olive-line); }
+
+/* RSVP */
+.form { display: grid; gap: 8px; margin-top: 12px; text-align: left; }
+.form input:not([type="radio"]), .form select, .form textarea {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--olive-line); background: #fffdf3;
+  font: 400 13.5px var(--km-body); color: var(--ink); outline: none;
+}
+.form input:focus, .form textarea:focus, .form select:focus { border-color: var(--olive); }
+.choices { display: flex; justify-content: center; gap: 16px; font-size: 13px; }
+.choices label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+.choices input { accent-color: var(--olive); }
+.msg { text-align: center; font-size: 12.5px; padding: 6px; background: color-mix(in srgb, var(--olive) 14%, transparent); }
+.msg.err { color: #9b1c1c; background: #fdecec; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+/* slide only — never start invisible, so content shows even where animations are paused */
+@keyframes rise { from { transform: translateY(14px); } to { transform: none; } }
+@keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+@media (prefers-reduced-motion: reduce) { .root * { animation: none !important; } }
+
+/* ===================== richer look + animation ===================== */
+
+/* soft vignette over the linen */
+.root::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 253, 240, 0.85), transparent 55%),
+    radial-gradient(ellipse at 50% 100%, rgba(163, 155, 45, 0.12), transparent 60%);
+}
+.root > .card { z-index: 1; }
+
+/* twinkling gold sparkles (two offset layers) */
+.sparkles, .sparkles2 {
+  position: absolute !important; inset: 0; z-index: 0 !important; pointer-events: none;
+  background-image: radial-gradient(circle, rgba(201, 180, 70, 0.9) 0 1.2px, transparent 2px),
+    radial-gradient(circle, rgba(201, 180, 70, 0.7) 0 1px, transparent 1.6px);
+  background-size: 140px 160px, 90px 110px;
+  background-position: 10px 20px, 60px 80px;
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+.sparkles2 { background-size: 170px 130px, 110px 150px; background-position: 70px 40px, 20px 100px; animation-delay: -2s; }
+
+/* drifting olive leaves */
+.leaves { position: sticky !important; top: 0; height: 0; z-index: 3 !important; pointer-events: none; }
+.leaves > div { position: absolute; inset: 0 0 auto; height: 100svh; overflow: hidden; }
+.leafFall {
+  position: absolute; top: -20px; width: var(--size); height: calc(var(--size) * 0.45);
+  border-radius: 100% 0; background: linear-gradient(135deg, #c3bb52, #8a8326);
+  opacity: 0.55;
+  animation: leafFall var(--dur) linear var(--delay) infinite, leafSway calc(var(--dur) / 3) ease-in-out var(--delay) infinite alternate;
+}
+
+/* gold-foil card border with a soft inner glow */
+.card {
+  border: 1px solid transparent;
+  background: linear-gradient(rgba(251, 249, 238, 0.82), rgba(248, 245, 228, 0.82)) padding-box,
+    linear-gradient(135deg, #d6cc6a, #8a8326 30%, #e8df8a 55%, #8a8326 80%, #cfc563) border-box;
+  box-shadow: 0 10px 28px rgba(85, 83, 26, 0.1), inset 0 0 40px rgba(255, 252, 230, 0.7);
+}
+
+/* shimmering gold headings */
+.title, .invite, .thanks, .contactsTitle {
+  background: linear-gradient(100deg, #7d7623 20%, #e2d777 42%, #a39b2d 52%, #7d7623 75%);
+  background-size: 260% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: shimmer 6s linear infinite;
+}
+
+/* flowers sway gently (transform only, always visible) */
+.flower { animation: sway 6s ease-in-out infinite alternate; transform-origin: 30% 30%; }
+.flowerBr { --r: 180deg; transform: rotate(180deg); transform-origin: 70% 70%; }
+.countPop { display: block; animation: pop 0.45s ease; }
+
+/* buttons: light sweep on hover */
+.btn, .btnOutline { position: relative; overflow: hidden; }
+.btn::after, .btnOutline::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: skewX(-20deg); transition: left 0.6s ease;
+}
+.btn:hover::after, .btnOutline:hover::after { left: 120%; }
+
+/* --- animations that start hidden only run once the page has reported in (.ready),
+       so content can never get stuck invisible --- */
+.reveal { transition: opacity 0.9s ease, transform 0.9s ease; transition-delay: calc(var(--i, 0) * 90ms); }
+.ready .reveal:not(.in) { opacity: 0; transform: translateY(22px); }
+.ready .flower path, .ready .flower circle { stroke-dasharray: 260; stroke-dashoffset: 260; animation: draw 2.6s ease forwards 0.3s; }
+.ready .ornament path, .ready .ornament ellipse { stroke-dasharray: 200; stroke-dashoffset: 200; animation: draw 1.8s ease forwards; }
+/* the signature writes itself once its card has scrolled into view */
+.ready .reveal:not(.in) .signature { clip-path: inset(0 100% 0 0); }
+.ready .reveal.in .signature { clip-path: inset(0 100% 0 0); animation: write 2.4s ease forwards 0.6s; }
+
+/* ---------- opening: two doors + wax seal (public link only) ---------- */
+.intro { position: fixed; inset: 0; z-index: 60; display: flex; cursor: pointer; }
+.door {
+  flex: 1; position: relative; background-color: #f1eedb;
+  background-image: repeating-linear-gradient(0deg, rgba(120, 110, 60, 0.06) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(120, 110, 60, 0.06) 0 1px, transparent 1px 4px);
+  box-shadow: inset 0 0 60px rgba(163, 155, 45, 0.18);
+  transition: transform 1.3s cubic-bezier(0.7, 0, 0.3, 1);
+}
+.door::before { content: ""; position: absolute; inset: 14px; border: 1px solid var(--olive-line); outline: 1px solid color-mix(in srgb, var(--olive) 30%, transparent); outline-offset: -7px; }
+.doorL::before { border-right: 0; }
+.doorR::before { border-left: 0; }
+.doorL { border-right: 1px solid var(--olive-line); }
+.introOpen .doorL { transform: translateX(-102%); }
+.introOpen .doorR { transform: translateX(102%); }
+.introOpen .seal, .introOpen .introText { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+.seal {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2;
+  width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center;
+  font: 400 22px/1 var(--km-display); color: #fff8dc; letter-spacing: 0.04em;
+  background: radial-gradient(circle at 35% 30%, #c9c05a, #8a8326 55%, #5f5a17);
+  box-shadow: 0 0 0 4px rgba(255, 252, 230, 0.6), 0 0 0 6px #a39b2d, 0 12px 30px rgba(70, 66, 18, 0.35), inset 0 -6px 14px rgba(0, 0, 0, 0.25);
+  transition: opacity 0.6s, transform 0.6s;
+  animation: sealPulse 2.4s ease-in-out infinite;
+}
+.seal span { font-size: 14px; margin: 0 3px; }
+.introText {
+  position: absolute; left: 50%; top: calc(50% + 92px); transform: translate(-50%, -50%); z-index: 2; white-space: nowrap;
+  font: 500 14px var(--km-body); color: var(--olive-dark); transition: opacity 0.6s, transform 0.6s;
+  animation: hint 1.8s ease-in-out infinite;
+}
+.introTitle { position: absolute; left: 50%; top: calc(50% - 120px); transform: translateX(-50%); z-index: 2; white-space: nowrap; font: 400 18px/1.9 var(--km-display); color: var(--olive); transition: opacity 0.5s; }
+.introOpen .introTitle { opacity: 0; }
+
+@keyframes twinkle { from { opacity: 0.25; } to { opacity: 0.85; } }
+@keyframes leafFall { from { transform: translate3d(0, -5vh, 0) rotate(0deg); } to { transform: translate3d(var(--drift), 105vh, 0) rotate(420deg); } }
+@keyframes leafSway { from { margin-left: -16px; } to { margin-left: 16px; } }
+@keyframes shimmer { to { background-position: -260% 0; } }
+@keyframes sway { from { transform: rotate(calc(var(--r, 0deg) - 2deg)); } to { transform: rotate(calc(var(--r, 0deg) + 2deg)); } }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes write { to { clip-path: inset(0 0 0 0); } }
+@keyframes pop { 0% { transform: scale(1.35); } 100% { transform: scale(1); } }
+@keyframes sealPulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.06); } }
+@keyframes hint { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .leaves, .sparkles, .sparkles2 { display: none; }
+  .ready .reveal:not(.in) { opacity: 1; transform: none; }
+  .ready .flower path, .ready .flower circle, .ready .ornament path, .ready .ornament ellipse { stroke-dashoffset: 0; }
+  .ready .reveal .signature { clip-path: none; animation: none; }
+  .door { transition: none; }
+}

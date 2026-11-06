@@ -1,0 +1,294 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String?   @unique
+  phone        String?   @unique
+  /// null for accounts created through Google/Telegram until a password is set on /account
+  passwordHash String?
+  /// Google account "sub" (Sign in with Google)
+  googleId     String?   @unique
+  /// Telegram user id (Telegram Login)
+  telegramId   String?   @unique
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  sessions     Session[]
+  events       Event[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  // SHA-256 of the cookie token; the raw token is never stored
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Event {
+  id             String         @id @default(cuid())
+  ownerId        String
+  owner          User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  title          String?
+  eventType      EventType      @default(WEDDING)
+  groomName      String
+  brideName      String
+  // English spellings and parents, shown on bilingual invitations
+  groomNameEn    String?
+  brideNameEn    String?
+  groomParents   String?
+  groomParentsEn String?
+  brideParents   String?
+  brideParentsEn String?
+  startsAt       DateTime
+  venue          String?
+  venueEn        String?
+  address        String?
+  mapUrl         String?
+  notes          String?
+  agenda         String?
+  // Cover photo stored inline (small, size-capped on upload); served by /api/events/[id]/cover
+  coverImage     Bytes?
+  coverImageType String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  guests         Guest[]
+  invitation     Invitation?
+  photos         EventPhoto[]
+  gallery        GalleryPhoto[]
+  rsvps          Rsvp[]
+  expenses       Expense[]
+  gifts          Gift[]
+  /// Wedding budget for the Expenses tab, in `currency`
+  budget         Decimal?       @db.Decimal(14, 2)
+  /// "USD" or "KHR" — all of the event's expense amounts use it
+  currency       String         @default("USD")
+  /// Riel per dollar, to put $ and ៛ gifts and expenses together on the dashboard (income vs expenses)
+  exchangeRate   Int            @default(4000)
+
+  @@index([ownerId])
+}
+
+enum EventType {
+  WEDDING
+  ENGAGEMENT
+  BIRTHDAY
+  OTHER
+}
+
+enum GuestSide {
+  BRIDE
+  GROOM
+  BOTH
+}
+
+enum GuestStatus {
+  PENDING
+  INVITED
+  CONFIRMED
+  DECLINED
+}
+
+model Guest {
+  id           String      @id @default(cuid())
+  eventId      String
+  event        Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name         String
+  phone        String?
+  side         GuestSide   @default(BOTH)
+  group        String?
+  invitedCount Int         @default(1)
+  status       GuestStatus @default(PENDING)
+  notes        String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  rsvps        Rsvp[]
+  gifts        Gift[]
+
+  @@index([eventId])
+}
+
+/// Public e-invitation settings for an event (one per event)
+model Invitation {
+  id            String   @id @default(cuid())
+  eventId       String   @unique
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  // Random id used in the public link /i/<shareId>; only served while published
+  shareId       String   @unique @default(cuid())
+  published     Boolean  @default(false)
+  template      String   @default("royal")
+  lang          String   @default("km")
+  title         String?
+  titleEn       String?
+  titleEnabled  Boolean  @default(true)
+  titleTop      String   @default("#FFE8B0")
+  titleBottom   String   @default("#E3A857")
+  titleOutline  String   @default("#6B3A1F")
+  message       String?
+  showDetails   Boolean  @default(true)
+  showCountdown Boolean  @default(true)
+  showAgenda    Boolean  @default(true)
+  showParents   Boolean  @default(true)
+  showMap       Boolean  @default(true)
+  showRsvp      Boolean  @default(true)
+  // ចំណងដៃ section: bank KHQR per currency (images are EventPhoto KHQR_USD / KHQR_KHR) + account details
+  showGiftQr       Boolean @default(true)
+  giftUsdBank    String?
+  giftUsdName    String?
+  giftUsdAccount String?
+  giftKhrBank    String?
+  giftKhrName    String?
+  giftKhrAccount String?
+  // Design settings (used by the Royal gold template)
+  // Lunar-calendar date line, typed by the couple (e.g. "ត្រូវនឹងថ្ងៃ ១៣រោច ខែអស្សុជ ...")
+  lunarDate     String?
+  // Contact phone numbers shown on the invitation (one per line)
+  contactPhones String?
+  themeColor    String   @default("#B8862F")
+  // temple | damask | peach | floral | custom (custom = uploaded BACKGROUND photo)
+  background    String   @default("temple")
+  // serif | sans
+  fontStyle     String   @default("serif")
+  // Uploaded music lives on disk under uploads/music/<musicFile>
+  musicFile     String?
+  musicName     String?
+  musicType     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum PhotoKind {
+  GROOM
+  BRIDE
+  VENUE
+  BACKGROUND
+  /// bank KHQR images guests scan to send ចំណងដៃ (gift money)
+  KHQR_USD
+  KHQR_KHR
+}
+
+/// Extra event photos (couple portraits, venue), stored inline like the cover
+model EventPhoto {
+  id        String    @id @default(cuid())
+  eventId   String
+  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  kind      PhotoKind
+  data      Bytes
+  type      String
+  updatedAt DateTime  @updatedAt
+
+  @@unique([eventId, kind])
+}
+
+enum RsvpAnswer {
+  YES
+  NO
+  MAYBE
+}
+
+/// A reply from the public invitation's RSVP form
+model Rsvp {
+  id        String     @id @default(cuid())
+  eventId   String
+  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  guestId   String?
+  guest     Guest?     @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  name      String
+  phone     String?
+  answer    RsvpAnswer
+  count     Int        @default(1)
+  message   String?
+  createdAt DateTime   @default(now())
+
+  @@index([eventId])
+}
+
+/// Photo gallery shown on the invitation (up to 12 per event, ordered by sort)
+model GalleryPhoto {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  data      Bytes
+  type      String
+  sort      Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([eventId, sort])
+}
+
+enum ExpenseCategory {
+  VENUE
+  FOOD
+  DECOR
+  ATTIRE
+  PHOTO
+  MUSIC
+  INVITATION
+  CEREMONY
+  TRANSPORT
+  OTHER
+}
+
+/// A planned or paid wedding cost (Expenses tab). `paid` tracks deposits: 0 ≤ paid ≤ amount.
+model Expense {
+  id        String          @id @default(cuid())
+  eventId   String
+  event     Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  title     String
+  /// Free-text section like "Group 1" (the budget sheet's tables); null = no group
+  group     String?
+  category  ExpenseCategory @default(OTHER)
+  vendor    String?
+  quantity  Decimal         @default(1) @db.Decimal(12, 2)
+  /// Price of one; amount = quantity × unitPrice (imported sheets may give only a total)
+  unitPrice Decimal?        @db.Decimal(14, 2)
+  amount    Decimal         @db.Decimal(14, 2)
+  paid      Decimal         @default(0) @db.Decimal(14, 2)
+  dueDate   DateTime?       @db.Date
+  notes     String?
+  /// Row order within the event (kept from an imported sheet)
+  sortOrder Int             @default(0)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([eventId])
+}
+
+enum GiftMethod {
+  CASH
+  BANK
+  OTHER
+}
+
+/// ចំណងដៃ — wedding gift money received (Gifts tab). Each gift keeps its own currency: guests give $ or ៛.
+model Gift {
+  id        String     @id @default(cuid())
+  eventId   String
+  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  /// set when the giver's name matches someone on the guest list
+  guestId   String?
+  guest     Guest?     @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  name      String
+  amount    Decimal    @db.Decimal(14, 2)
+  /// "USD" or "KHR"
+  currency  String     @default("USD")
+  side      GuestSide  @default(BOTH)
+  method    GiftMethod @default(CASH)
+  notes     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([eventId])
+  @@index([guestId])
+}

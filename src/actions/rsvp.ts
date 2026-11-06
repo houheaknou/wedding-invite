@@ -1,0 +1,56 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import type { GuestStatus, RsvpAnswer } from "@prisma/client";
+import { prisma } from "@/lib/db";
+import { normalizePhone } from "@/lib/auth";
+
+export type RsvpState = { ok?: boolean; error?: "name" | "phone" | "closed" } | undefined;
+
+const ANSWERS: RsvpAnswer[] = ["YES", "NO", "MAYBE"];
+const STATUS_FOR: Record<RsvpAnswer, GuestStatus> = { YES: "CONFIRMED", NO: "DECLINED", MAYBE: "INVITED" };
+const str = (fd: FormData, key: string, max: number) => String(fd.get(key) ?? "").trim().slice(0, max);
+
+/**
+ * Public RSVP from a published invitation. The reply is stored and folded into the guest list:
+ * the personal-link guest (or a guest with the same phone) is updated, otherwise a guest is added.
+ */
+export async function submitRsvp(shareId: string, guestId: string | null, _: RsvpState, fd: FormData): Promise<RsvpState> {
+  // Honeypot: bots fill every field; pretend success
+  if (str(fd, "website", 200)) return { ok: true };
+
+  const inv = await prisma.invitation.findFirst({ where: { shareId, published: true, showRsvp: true }, select: { eventId: true } });
+  if (!inv) return { error: "closed" };
+  const eventId = inv.eventId;
+
+  // Name and phone are checked only when the template's form asks for them: some templates (Falling
+  // petals) send just the answer, head count and wish — the personal-link guest's name is used then.
+  const linkGuest = guestId ? await prisma.guest.findFirst({ where: { id: guestId, eventId }, select: { id: true, name: true } }) : null;
+  const typedName = str(fd, "name", 120);
+  if (fd.has("name") && !typedName) return { error: "name" };
+  const name = typedName || linkGuest?.name || "ភ្ញៀវកិត្តិយស";
+  const phoneRaw = str(fd, "phone", 40);
+  const phone = phoneRaw ? normalizePhone(phoneRaw) : null;
+  if (fd.has("phone") && (phone ?? "").replace("+", "").length < 6) return { error: "phone" };
+  const answer = ANSWERS.includes(fd.get("answer") as RsvpAnswer) ? (fd.get("answer") as RsvpAnswer) : "YES";
+  const count = Math.min(Math.max(Number.parseInt(String(fd.get("count") ?? "1"), 10) || 1, 1), 20);
+  const message = str(fd, "message", 1000) || null;
+
+  const guest = linkGuest || (phone ? await prisma.guest.findFirst({ where: { eventId, phone }, select: { id: true } }) : null);
+
+  const status = STATUS_FOR[answer];
+  const linked = guest
+    ? await prisma.guest.update({
+        where: { id: guest.id },
+        data: { status, ...(answer !== "NO" && { invitedCount: count }) },
+        select: { id: true },
+      })
+    : await prisma.guest.create({
+        data: { eventId, name, phone, status, invitedCount: count, group: "RSVP", notes: message },
+        select: { id: true },
+      });
+
+  await prisma.rsvp.create({ data: { eventId, guestId: linked.id, name, phone, answer, count, message } });
+  revalidatePath(`/events/${eventId}`, "layout");
+  return { ok: true };
+}

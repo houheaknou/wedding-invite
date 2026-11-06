@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
+/* No dark theme: keep phone browsers' forced dark mode off (see viewport in app/layout.tsx) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: only light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-noto-sans-khmer), var(--font-inter), sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Brand palette: warm ivory background, gold primary (matches the gold monogram logo).
+   600 is the main text/button colour — dark enough for white button text (≈4.7:1). */
+@theme {
+  --color-blush: #fbf6ec;
+  --color-brand-50: #fdf8ec;
+  --color-brand-100: #faefd2;
+  --color-brand-200: #f3dea3;
+  --color-brand-300: #e6c26a;
+  --color-brand-400: #d9a93f;
+  --color-brand-500: #c08a1e;
+  --color-brand-600: #9a6a12;
+  --color-brand-700: #7f5610;
+  --color-brand-800: #654410;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-blush);
+  color: #292524;
+  font-family: var(--font-sans);
+  /* Khmer script needs extra line height for stacked subscripts (ជើង) */
+  line-height: 1.7;
+}
+
+/* login / sign-up background: hearts and petals drifting gently */
+@keyframes auth-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-8deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(8deg);
+  }
+}
+.auth-float {
+  animation: auth-float 6s ease-in-out infinite;
+}
+/* gold button: a soft light streak sweeps across on hover */
+.auth-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.45) 50%, transparent 70%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+.auth-shine:hover::after {
+  transition: transform 0.8s ease;
+  transform: translateX(120%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-float {
+    animation: none;
+  }
+  .auth-shine:hover::after {
+    transition: none;
+  }
+}
+
+dialog::backdrop {
+  background: rgb(41 37 36 / 0.35);
+  backdrop-filter: blur(2px);
+}
+
+/* the hidden attribute always wins over component display styles */
+[hidden] {
+  display: none !important;
 }
