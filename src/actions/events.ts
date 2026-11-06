@@ -9,9 +9,9 @@ import { getDict, type Dict } from "@/lib/i18n";
 import { parseLocalDateTime } from "@/lib/format";
 import { EVENT_TYPES } from "@/lib/constants";
 import { deleteMusic } from "@/lib/media";
+import { readImage } from "@/lib/file-check";
 import type { FormState } from "@/actions/auth";
 
-const COVER_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const COVER_MAX_BYTES = 3 * 1024 * 1024;
 
 const opt = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim() || null;
@@ -47,8 +47,9 @@ function readEvent(fd: FormData, t: Dict) {
 async function readCover(fd: FormData, t: Dict) {
   const file = fd.get("cover");
   if (file instanceof File && file.size > 0) {
-    if (!COVER_TYPES.includes(file.type) || file.size > COVER_MAX_BYTES) return { error: t.errBadImage };
-    return { data: { coverImage: new Uint8Array(await file.arrayBuffer()), coverImageType: file.type } };
+    const img = await readImage(file, COVER_MAX_BYTES);
+    if (!img) return { error: t.errBadImage };
+    return { data: { coverImage: img.data, coverImageType: img.type } };
   }
   if (fd.get("removeCover") === "1") return { data: { coverImage: null, coverImageType: null } };
   return { data: {} };

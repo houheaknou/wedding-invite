@@ -7,8 +7,9 @@ import { requireOwnedEvent } from "@/lib/auth";
 import { getDict } from "@/lib/i18n";
 import { parseLocalDateTime } from "@/lib/format";
 import { BACKGROUNDS, FONT_STYLES, HEX, INVITE_LANGS, templateById, type InviteLang } from "@/lib/invitation";
-import { deleteMusic, ensureInvitation, MUSIC_MAX_BYTES, MUSIC_TYPES, saveMusic } from "@/lib/media";
-import { PHOTO_KINDS, PHOTO_MAX_BYTES, PHOTO_TYPES } from "@/lib/photos";
+import { deleteMusic, ensureInvitation, MUSIC_MAX_BYTES, saveMusic } from "@/lib/media";
+import { PHOTO_KINDS, PHOTO_MAX_BYTES } from "@/lib/photos";
+import { readAudio, readImage } from "@/lib/file-check";
 
 export type SaveState = { error?: string; message?: string; at?: number } | undefined;
 
@@ -46,8 +47,9 @@ export async function saveInvitation(eventId: string, _: SaveState, fd: FormData
   for (const kind of PHOTO_KINDS) {
     const file = fd.get(`photo_${kind}`);
     if (file instanceof File && file.size > 0) {
-      if (!PHOTO_TYPES.includes(file.type) || file.size > PHOTO_MAX_BYTES) return { error: t.errBadImage };
-      photoWrites.push({ kind, data: new Uint8Array(await file.arrayBuffer()), type: file.type });
+      const img = await readImage(file, PHOTO_MAX_BYTES);
+      if (!img) return { error: t.errBadImage };
+      photoWrites.push({ kind, data: img.data, type: img.type });
     } else if (flag(fd, `remove_${kind}`)) {
       photoRemovals.push(kind);
     }
@@ -56,8 +58,9 @@ export async function saveInvitation(eventId: string, _: SaveState, fd: FormData
   let coverData = {};
   const cover = fd.get("photo_COVER");
   if (cover instanceof File && cover.size > 0) {
-    if (!PHOTO_TYPES.includes(cover.type) || cover.size > PHOTO_MAX_BYTES) return { error: t.errBadImage };
-    coverData = { coverImage: new Uint8Array(await cover.arrayBuffer()), coverImageType: cover.type };
+    const img = await readImage(cover, PHOTO_MAX_BYTES);
+    if (!img) return { error: t.errBadImage };
+    coverData = { coverImage: img.data, coverImageType: img.type };
   } else if (flag(fd, "remove_COVER")) {
     coverData = { coverImage: null, coverImageType: null };
   }
@@ -66,10 +69,11 @@ export async function saveInvitation(eventId: string, _: SaveState, fd: FormData
   const music = fd.get("music");
   let musicData = {};
   if (music instanceof File && music.size > 0) {
-    if (!MUSIC_TYPES[music.type] || music.size > MUSIC_MAX_BYTES) return { error: t.errBadMusic };
-    const name = await saveMusic(eventId, music);
+    const song = await readAudio(music, MUSIC_MAX_BYTES);
+    if (!song) return { error: t.errBadMusic };
+    const name = await saveMusic(eventId, song.data, song.ext);
     await deleteMusic(current.musicFile);
-    musicData = { musicFile: name, musicName: music.name.slice(0, 120), musicType: music.type };
+    musicData = { musicFile: name, musicName: music.name.slice(0, 120), musicType: song.type };
   } else if (flag(fd, "removeMusic")) {
     await deleteMusic(current.musicFile);
     musicData = { musicFile: null, musicName: null, musicType: null };

@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireOwnedEvent } from "@/lib/auth";
 import { getDict } from "@/lib/i18n";
-import { PHOTO_MAX_BYTES, PHOTO_TYPES } from "@/lib/photos";
+import { PHOTO_MAX_BYTES } from "@/lib/photos";
+import { readImage } from "@/lib/file-check";
 import { GALLERY_MAX } from "@/lib/constants";
 
 export type GalleryResult = { ok: true; photo: { id: string; url: string } } | { ok: false; error: string };
@@ -14,13 +15,12 @@ export async function addGalleryPhoto(eventId: string, fd: FormData): Promise<Ga
   await requireOwnedEvent(eventId);
   const { t } = await getDict();
   const file = fd.get("photo");
-  if (!(file instanceof File) || file.size === 0 || !PHOTO_TYPES.includes(file.type) || file.size > PHOTO_MAX_BYTES) {
-    return { ok: false, error: t.errBadImage };
-  }
+  const img = file instanceof File ? await readImage(file, PHOTO_MAX_BYTES) : null;
+  if (!img) return { ok: false, error: t.errBadImage };
   const agg = await prisma.galleryPhoto.aggregate({ where: { eventId }, _count: true, _max: { sort: true } });
   if (agg._count >= GALLERY_MAX) return { ok: false, error: t.galleryFull };
   const photo = await prisma.galleryPhoto.create({
-    data: { eventId, data: new Uint8Array(await file.arrayBuffer()), type: file.type, sort: (agg._max.sort ?? -1) + 1 },
+    data: { eventId, data: img.data, type: img.type, sort: (agg._max.sort ?? -1) + 1 },
     select: { id: true },
   });
   revalidatePath(`/events/${eventId}`, "layout");

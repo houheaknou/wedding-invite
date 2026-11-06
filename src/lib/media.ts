@@ -10,21 +10,14 @@ import type { InvitationData, InviteLang, TemplateId } from "@/lib/invitation";
 
 // Music is too large for the DB; keep it on local disk (move to object storage for production)
 const MUSIC_DIR = path.join(process.cwd(), "uploads", "music");
-export const MUSIC_TYPES: Record<string, string> = {
-  "audio/mpeg": "mp3",
-  "audio/mp3": "mp3",
-  "audio/mp4": "m4a",
-  "audio/x-m4a": "m4a",
-  "audio/aac": "aac",
-  "audio/ogg": "ogg",
-  "audio/wav": "wav",
-};
+// accepted formats are decided by content: see sniffAudio in lib/file-check
 export const MUSIC_MAX_BYTES = 10 * 1024 * 1024;
 
-export async function saveMusic(eventId: string, file: File) {
+/** Store an already-checked song (see readAudio in lib/file-check) under a server-made name. */
+export async function saveMusic(eventId: string, data: Uint8Array, ext: string) {
   await mkdir(MUSIC_DIR, { recursive: true });
-  const name = `${eventId}-${randomBytes(6).toString("hex")}.${MUSIC_TYPES[file.type]}`;
-  await writeFile(path.join(MUSIC_DIR, name), new Uint8Array(await file.arrayBuffer()));
+  const name = `${eventId}-${randomBytes(6).toString("hex")}.${ext}`;
+  await writeFile(path.join(MUSIC_DIR, name), data);
   return name;
 }
 

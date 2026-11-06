@@ -3,7 +3,7 @@ import type { PhotoKind } from "@prisma/client";
 import { prisma } from "@/lib/db";
 
 export const PHOTO_KINDS: PhotoKind[] = ["GROOM", "BRIDE", "VENUE", "BACKGROUND", "KHQR_USD", "KHQR_KHR"];
-export const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+// accepted image formats are decided by content: see sniffImage in lib/file-check
 export const PHOTO_MAX_BYTES = 3 * 1024 * 1024;
 
 export function parseKind(kind: string): PhotoKind | null {
