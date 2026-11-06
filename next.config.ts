@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Self-contained server in .next/standalone for the Docker image (see Dockerfile)
+  output: "standalone",
   experimental: {
     serverActions: {
       // Guest imports, cover photos and invitation music (≤10MB) go through server actions

@@ -1,0 +1,67 @@
+# Production stack: database + one-shot migrations + app.
+#   docker compose -f docker-compose.prod.yml up -d --build
+# Its own Compose project (`name:`), so its volumes/network never mix with the dev database
+# in docker-compose.yml. Secrets come from .env (see .env.example); POSTGRES_PASSWORD is required.
+name: wedding-invite-prod
+
+x-db-url: &db-url postgresql://${POSTGRES_USER:-wedding}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-wedding_invite}?schema=public&connection_limit=5
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-wedding}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-wedding_invite}
+    # not published to the host: only the app (same network) talks to it
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging: &logging
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  # Applies prisma/migrations, then exits; the app starts only after it succeeded
+  migrate:
+    build: { context: ., target: migrate }
+    environment:
+      DATABASE_URL: *db-url
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+    logging: *logging
+
+  app:
+    build:
+      context: .
+      target: runner
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
+    restart: unless-stopped
+    init: true # forwards SIGTERM so the server shuts down cleanly
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: *db-url # overrides the dev DATABASE_URL from .env
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    # localhost only: put a reverse proxy (Caddy/nginx with HTTPS) in front
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+    volumes:
+      - uploads:/app/uploads
+    deploy:
+      resources:
+        limits: { memory: 512m }
+    logging: *logging
+
+volumes:
+  pgdata:
+  uploads:

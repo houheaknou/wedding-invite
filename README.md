@@ -55,6 +55,24 @@ memory until it is restarted.
 Useful scripts: `npm run db:up`, `npm run db:migrate`, `npm run db:seed`,
 `npm run db:studio`, `npm run lint`, `npm run build`.
 
+## Production (Docker)
+
+`docker-compose.prod.yml` runs the database, a one-shot migration job and the
+app (Next.js standalone, non-root, health-checked at `/api/health`). It is its
+own Compose project (`wedding-invite-prod`), so it never touches the dev
+database volume.
+
+```bash
+# .env needs POSTGRES_PASSWORD and NEXT_PUBLIC_APP_URL (+ Google/Telegram keys), see .env.example
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+- The app listens on `127.0.0.1:${APP_PORT:-3000}` only; put Caddy/nginx with
+  HTTPS in front of it. The database is not published to the host at all.
+- `NEXT_PUBLIC_APP_URL` is baked in at build time: rebuild after changing it.
+- Data lives in the `pgdata` and `uploads` volumes. Stop with `down`, **never
+  `down -v`** (that deletes them).
+
 ## What's in the MVP
 
 - **Accounts** — sign up / log in with email **or** phone number + password
