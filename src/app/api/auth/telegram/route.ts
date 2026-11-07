@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createSession } from "@/features/auth/session";
-import { appOrigin, telegramProfile, userForSocial } from "@/features/auth/social";
+import { appOrigin } from "@/lib/app-origin";
+import { telegramProfile, userForSocial } from "@/features/auth/social";
 
 /** The Telegram Login Widget redirects here with the signed user data (?id&first_name&…&hash). */
 export async function GET(req: NextRequest) {

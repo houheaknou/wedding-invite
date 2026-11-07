@@ -1,6 +1,6 @@
 import "server-only";
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
-import { headers } from "next/headers";
+import { appOrigin } from "@/lib/app-origin";
 import { prisma } from "@/lib/db";
 
 /**
@@ -15,15 +15,6 @@ export const telegramBot = () =>
 
 /** The bot's numeric id: the part of the token before ":" (public — Telegram's login popup needs it). */
 export const telegramBotId = () => process.env.TELEGRAM_BOT_TOKEN?.split(":")[0] ?? null;
-
-/** Public origin of this request (works behind a tunnel/proxy); NEXT_PUBLIC_APP_URL wins when set. */
-export async function appOrigin() {
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "");
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto")?.split(",")[0] ?? (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
-}
 
 export const googleRedirectUri = async () => `${await appOrigin()}/api/auth/google/callback`;
 

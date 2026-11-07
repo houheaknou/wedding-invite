@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { appOrigin } from "@/lib/app-origin";
 import { getDict } from "@/lib/i18n";
 import "./globals.css";
 
@@ -24,7 +25,9 @@ export const viewport: Viewport = { colorScheme: "only light" };
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getDict();
-  return { title: t.appName, description: t.tagline };
+  // Absolute base for share previews (og:image): Telegram/Facebook fetch the invitation's cover
+  // from the public address the visitor came through, never from localhost
+  return { metadataBase: new URL(await appOrigin()), title: t.appName, description: t.tagline };
 }
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

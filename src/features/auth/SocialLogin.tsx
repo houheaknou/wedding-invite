@@ -1,5 +1,6 @@
 import { Heart } from "lucide-react";
-import { appOrigin, googleEnabled, telegramBot, telegramBotId } from "@/features/auth/social";
+import { appOrigin } from "@/lib/app-origin";
+import { googleEnabled, telegramBot, telegramBotId } from "@/features/auth/social";
 import type { Dict } from "@/lib/i18n";
 import { TelegramButton } from "@/features/auth/TelegramWidget";
 
