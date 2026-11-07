@@ -72,6 +72,26 @@ npm run dev             # http://localhost:3001
 The tester server does not pick up code changes: run `testers:build` again, then restart
 `testers:start`.
 
+## Hosting on Vercel (live site)
+
+Live at **https://chhynou-mongkolday.vercel.app**: Vercel project `wedding-invite` (account
+`nounou3`), deployed automatically on every push to `main`.
+
+| Piece | Where |
+|---|---|
+| Database | Neon project `summer-forest-45946887`, branch `production`, connected via the Neon–Vercel integration (`DATABASE_URL` pooled, `DATABASE_URL_UNPOOLED` direct) |
+| Music | Vercel Blob store `wedding-invite-blob` (public, Singapore) → `BLOB_READ_WRITE_TOKEN`; the browser uploads songs straight to Blob |
+| Photos | in the database (shrunk in the browser to 1600px before upload) |
+| Public URL | `NEXT_PUBLIC_APP_URL=https://chhynou-mongkolday.vercel.app` |
+
+- `npm run vercel-build` (used by Vercel) applies pending Prisma migrations over the direct Neon
+  connection, then builds. Schema changes deploy with a normal push.
+- Vercel caps each request at 4.5 MB: keep uploads that go through server actions under that.
+- Google / Telegram sign-in on the live site need `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
+  `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME` in Vercel → Environment Variables, plus the
+  redirect URI `https://chhynou-mongkolday.vercel.app/api/auth/google/callback` in Google Cloud and
+  `/setdomain chhynou-mongkolday.vercel.app` for the bot in BotFather.
+
 ## Production (Docker)
 
 `docker-compose.prod.yml` runs the database, a one-shot migration job and the
