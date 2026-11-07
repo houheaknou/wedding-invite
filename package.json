@@ -7,6 +7,7 @@
     "testers:build": "node scripts/testers.mjs build",
     "testers:start": "node scripts/testers.mjs start",
     "build": "next build",
+    "vercel-build": "node scripts/vercel-build.mjs",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run --project unit",
@@ -20,6 +21,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "@vercel/blob": "^1.1.1",
     "bcryptjs": "^3.0.3",
     "exceljs": "^4.4.0",
     "jsqr": "^1.4.0",

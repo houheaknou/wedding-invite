@@ -7,7 +7,7 @@ import { requireOwnedEvent } from "@/features/auth/session";
 import { getDict } from "@/lib/i18n";
 import { parseLocalDateTime } from "@/lib/format";
 import { BACKGROUNDS, FONT_STYLES, HEX, INVITE_LANGS, templateById, type InviteLang } from "@/features/invitation/shared";
-import { deleteMusic, ensureInvitation, MUSIC_MAX_BYTES, saveMusic } from "@/features/invitation/media";
+import { checkBlobSong, deleteMusic, ensureInvitation, MUSIC_MAX_BYTES, saveMusic } from "@/features/invitation/media";
 import { PHOTO_KINDS, PHOTO_MAX_BYTES } from "@/features/invitation/photos";
 import { readAudio, readImage } from "@/lib/file-check";
 import { opt } from "@/lib/parse";
@@ -74,6 +74,16 @@ export async function saveInvitation(eventId: string, _: SaveState, fd: FormData
     const name = await saveMusic(eventId, song.data, song.ext);
     await deleteMusic(current.musicFile);
     musicData = { musicFile: name, musicName: music.name.slice(0, 120), musicType: song.type };
+  } else if (typeof fd.get("musicBlobUrl") === "string" && fd.get("musicBlobUrl")) {
+    // uploaded by the browser straight to Vercel Blob (see api/events/[id]/music/upload)
+    const url = String(fd.get("musicBlobUrl"));
+    const song = await checkBlobSong(eventId, url);
+    if (!song) {
+      await deleteMusic(url);
+      return { error: t.errBadMusic };
+    }
+    if (current.musicFile !== url) await deleteMusic(current.musicFile);
+    musicData = { musicFile: url, musicName: String(fd.get("musicBlobName") ?? "").slice(0, 120) || null, musicType: song.type };
   } else if (flag(fd, "removeMusic")) {
     await deleteMusic(current.musicFile);
     musicData = { musicFile: null, musicName: null, musicType: null };

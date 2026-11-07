@@ -7,7 +7,7 @@ import { coverUrl, toLocalInputValue } from "@/lib/format";
 import { parseAgenda } from "@/features/invitation/agenda";
 import type { InviteLang, TemplateId } from "@/features/invitation/shared";
 import { resolveMapEmbed } from "@/features/invitation/map-embed";
-import { ensureInvitation, photoUrls } from "@/features/invitation/media";
+import { blobMusicEnabled, ensureInvitation, musicBlobPrefix, photoUrls } from "@/features/invitation/media";
 import { TemplateEditor } from "@/features/invitation/editor/TemplateEditor";
 import { pick, TEMPLATE_EDITOR_KEYS } from "@/lib/ui-keys";
 
@@ -33,6 +33,7 @@ export default async function TemplatePage({ params }: { params: Promise<{ id: s
       gallery={gallery.map((g) => ({ id: g.id, url: `/api/events/${id}/gallery/${g.id}` }))}
       addGalleryPhoto={addGalleryPhoto.bind(null, id)}
       deleteGalleryPhoto={deleteGalleryPhoto.bind(null, id)}
+      musicUpload={blobMusicEnabled() ? { url: `/api/events/${id}/music/upload`, prefix: musicBlobPrefix(id) } : null}
       media={{
         coverUrl: coverUrl(event),
         musicUrl: inv.musicFile ? `/api/events/${id}/music?v=${encodeURIComponent(inv.musicFile)}` : null,

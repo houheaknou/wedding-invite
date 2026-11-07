@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import { cropToQr } from "@/features/invitation/crop-qr";
+import { shrinkImage } from "@/lib/shrink-image";
 import {
   CalendarDays,
   Check,
@@ -12,6 +13,7 @@ import {
   LayoutTemplate,
   Link2,
   ListPlus,
+  Loader2,
   Music2,
   Plus,
   RotateCcw,
@@ -169,6 +171,7 @@ export function TemplateEditor({
   gallery,
   addGalleryPhoto,
   deleteGalleryPhoto,
+  musicUpload,
 }: {
   action: (state: SaveState, fd: FormData) => Promise<SaveState>;
   t: TemplateEditorDict;
@@ -178,6 +181,8 @@ export function TemplateEditor({
   gallery: GalleryItem[];
   addGalleryPhoto: (fd: FormData) => Promise<GalleryResult>;
   deleteGalleryPhoto: (photoId: string) => Promise<void>;
+  /** Set on Vercel: songs go straight to Blob storage via this upload route (see media.ts) */
+  musicUpload: { url: string; prefix: string } | null;
 }) {
   const [state, formAction] = useActionState(action, undefined);
   const [s, setS] = useState(initial);
@@ -206,6 +211,10 @@ export function TemplateEditor({
   const musicInput = useRef<HTMLInputElement>(null);
   const [music, setMusic] = useState<{ url: string | null; name: string | null }>({ url: media.musicUrl, name: media.musicName });
   const [removeMusic, setRemoveMusic] = useState(false);
+  // Blob mode: the song already uploaded and waiting to be saved, the upload in progress, a failure
+  const [musicBlob, setMusicBlob] = useState<{ url: string; name: string } | null>(null);
+  const [musicBusy, setMusicBusy] = useState(false);
+  const [musicErr, setMusicErr] = useState(false);
   const [origin, setOrigin] = useState("");
   const [copied, setCopied] = useState(false);
   const [showSaved, setShowSaved] = useState(false);
@@ -217,6 +226,7 @@ export function TemplateEditor({
     if (!state?.message) return;
     setShowSaved(true);
     setRemoveMusic(false);
+    setMusicBlob(null);
     setRemoved({ GROOM: false, BRIDE: false, VENUE: false, BACKGROUND: false, KHQR_USD: false, KHQR_KHR: false, COVER: false });
     const id = setTimeout(() => setShowSaved(false), 2500);
     return () => clearTimeout(id);
@@ -301,6 +311,15 @@ export function TemplateEditor({
                 dt.items.add(cropped);
                 input.files = dt.files; // the cropped image is what gets saved
                 f = cropped;
+              }
+            } else {
+              // other photos: shrink before upload, so a save with several photos stays small
+              const small = await shrinkImage(f);
+              if (small !== f) {
+                const dt = new DataTransfer();
+                dt.items.add(small);
+                input.files = dt.files;
+                f = small;
               }
             }
             setPhotos((p) => ({ ...p, [kind]: URL.createObjectURL(f) }));
@@ -813,6 +832,7 @@ export function TemplateEditor({
                     onClick={() => {
                       if (musicInput.current) musicInput.current.value = "";
                       setMusic({ url: null, name: null });
+                      setMusicBlob(null);
                       setRemoveMusic(true);
                     }}
                     className="ml-auto inline-flex size-7 shrink-0 items-center justify-center rounded-md text-stone-500 hover:text-red-600"
@@ -822,23 +842,51 @@ export function TemplateEditor({
                 )}
               </div>
               {music.url && <audio key={music.url} src={music.url} controls preload="none" className="h-10 w-full" />}
-              <button type="button" onClick={() => musicInput.current?.click()} className={softBtn}>
-                <Upload className="size-3.5" />
-                {t.uploadMusic}
+              <button type="button" onClick={() => musicInput.current?.click()} className={softBtn} disabled={musicBusy}>
+                {musicBusy ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+                {musicBusy ? t.musicUploading : t.uploadMusic}
               </button>
               <input
                 ref={musicInput}
                 type="file"
-                name="music"
+                // Blob mode: the song is uploaded right away and only its URL is sent with the form
+                name={musicUpload ? undefined : "music"}
                 accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/aac,audio/ogg,audio/wav,.mp3,.m4a,.ogg,.wav"
                 className="hidden"
-                onChange={(e) => {
+                onChange={async (e) => {
                   const f = e.target.files?.[0];
                   if (!f) return;
+                  const before = music;
                   setMusic({ url: URL.createObjectURL(f), name: f.name });
                   setRemoveMusic(false);
+                  setMusicErr(false);
+                  if (!musicUpload) return;
+                  setMusicBusy(true);
+                  try {
+                    const { upload } = await import("@vercel/blob/client");
+                    const safe = f.name.replace(/[^\w.-]+/g, "-").slice(-80) || "song";
+                    const blob = await upload(musicUpload.prefix + safe, f, {
+                      access: "public",
+                      handleUploadUrl: musicUpload.url,
+                      contentType: f.type || "application/octet-stream",
+                    });
+                    setMusicBlob({ url: blob.url, name: f.name });
+                  } catch {
+                    setMusicErr(true);
+                    setMusic(before);
+                  } finally {
+                    setMusicBusy(false);
+                    e.target.value = "";
+                  }
                 }}
               />
+              {musicBlob && (
+                <>
+                  <input type="hidden" name="musicBlobUrl" value={musicBlob.url} />
+                  <input type="hidden" name="musicBlobName" value={musicBlob.name} />
+                </>
+              )}
+              {musicErr && <p className="text-xs text-red-600">{t.errMusicUpload}</p>}
               <p className="text-xs text-stone-500">{t.musicHint}</p>
             </div>
           </div>
@@ -849,7 +897,9 @@ export function TemplateEditor({
             </div>
           )}
           <div className="mt-5">
-            <SubmitButton className={goldBtn}>{t.bSaveAndPreview}</SubmitButton>
+            <SubmitButton className={goldBtn} disabled={musicBusy}>
+              {t.bSaveAndPreview}
+            </SubmitButton>
             {showSaved && <p className="mt-2 text-center text-sm text-emerald-600">{state?.message}</p>}
           </div>
         </div>

@@ -5,11 +5,33 @@ import { mkdir, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
 import type { Event, Invitation, PhotoKind } from "@prisma/client";
+import { del } from "@vercel/blob";
+import { sniffAudio, type AudioFormat } from "@/lib/file-check";
 import { prisma } from "@/lib/db";
 import type { InvitationData, InviteLang, TemplateId } from "@/features/invitation/shared";
 
-// Music is too large for the DB; keep it on local disk (move to object storage for production)
+/**
+ * Where songs live. On Vercel (BLOB_READ_WRITE_TOKEN set) the browser uploads straight to Vercel
+ * Blob (see api/events/[id]/music/upload) and Invitation.musicFile holds the blob's https URL;
+ * Vercel's disk is read-only and its requests are capped at 4.5 MB. Elsewhere (this PC, Docker)
+ * songs go through the save form onto local disk and musicFile holds the file name.
+ */
 const MUSIC_DIR = path.join(process.cwd(), "uploads", "music");
+export const blobMusicEnabled = () => Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+export const isBlobUrl = (s: string) => /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\//i.test(s);
+/** Blob path of an event's songs: the upload route only hands out tokens under it. */
+export const musicBlobPrefix = (eventId: string) => `music/${eventId}/`;
+
+/**
+ * A song the browser uploaded to Blob: it must be in our store, under this event's folder, and its
+ * first bytes must be real audio (sniffAudio, same rule as disk uploads). Null otherwise.
+ */
+export async function checkBlobSong(eventId: string, url: string): Promise<AudioFormat | null> {
+  if (!isBlobUrl(url) || !new URL(url).pathname.startsWith(`/${musicBlobPrefix(eventId)}`)) return null;
+  const res = await fetch(url, { headers: { Range: "bytes=0-63" }, cache: "no-store" }).catch(() => null);
+  if (!res?.ok) return null;
+  return sniffAudio(new Uint8Array(await res.arrayBuffer()));
+}
 // accepted formats are decided by content: see sniffAudio in lib/file-check
 export const MUSIC_MAX_BYTES = 10 * 1024 * 1024;
 
@@ -22,12 +44,15 @@ export async function saveMusic(eventId: string, data: Uint8Array, ext: string) 
 }
 
 export async function deleteMusic(name: string | null | undefined) {
+  if (name && isBlobUrl(name)) return void (await del(name).catch(() => {}));
   if (!name || name.includes("/") || name.includes("\\")) return;
   await unlink(path.join(MUSIC_DIR, name)).catch(() => {});
 }
 
 /** Stream an uploaded music file, honouring Range requests so the player can seek. */
 export async function serveMusic(name: string, type: string, req: Request) {
+  // Blob songs: the CDN serves them (with Range support) from their unguessable URL
+  if (isBlobUrl(name)) return Response.redirect(name, 302);
   if (name.includes("/") || name.includes("\\")) return new Response("Not found", { status: 404 });
   const file = path.join(MUSIC_DIR, name);
   const info = await stat(file).catch(() => null);

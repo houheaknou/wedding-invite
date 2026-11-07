@@ -185,6 +185,8 @@ export const GALLERY_KEYS = keys(
 export type GalleryDict = Pick<Dict, (typeof GALLERY_KEYS)[number]>;
 
 export const TEMPLATE_EDITOR_KEYS = keys(
+  "musicUploading",
+  "errMusicUpload",
   ...GALLERY_KEYS,
   "address",
   "bActivity",

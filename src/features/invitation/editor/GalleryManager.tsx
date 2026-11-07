@@ -4,25 +4,10 @@ import { useRef, useState } from "react";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import type { GalleryResult } from "@/features/invitation/gallery-actions";
 import { GALLERY_MAX } from "@/lib/constants";
+import { shrinkImage } from "@/lib/shrink-image";
 import type { GalleryDict } from "@/lib/ui-keys";
 
 export type GalleryItem = { id: string; url: string };
-
-/** Shrink a photo in the browser (max 1600px, JPEG) so uploads stay small and quick. */
-async function downscale(file: File): Promise<File> {
-  try {
-    const bmp = await createImageBitmap(file);
-    const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(bmp.width * scale);
-    canvas.height = Math.round(bmp.height * scale);
-    canvas.getContext("2d")!.drawImage(bmp, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.85));
-    return blob ? new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" }) : file;
-  } catch {
-    return file; // unsupported format: let the server validate the original
-  }
-}
 
 /**
  * Gallery editor inside the builder. Photos are uploaded and deleted immediately (one request each),
@@ -61,7 +46,7 @@ export function GalleryManager({
     setBusy(picked.length);
     for (const file of picked) {
       const fd = new FormData();
-      fd.append("photo", await downscale(file));
+      fd.append("photo", await shrinkImage(file));
       const res = await add(fd);
       if (res.ok) {
         current = [...current, res.photo];
