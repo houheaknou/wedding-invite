@@ -8,6 +8,7 @@ import { parseAgenda } from "@/features/invitation/agenda";
 import { royalFontVars } from "@/features/invitation/fonts";
 import { formatInviteDate, INVITE_TEXT, type InvitationData, type InviteLang, mapEmbedSrc } from "@/features/invitation/shared";
 import s from "./petal.module.css";
+import { TelegramIcon } from "@/components/TelegramIcon";
 
 const T = {
   km: {
@@ -725,7 +726,7 @@ export function PetalInvitation({
           {t.thanksSub && <p className={s.thanksEn}>{t.thanksSub}</p>}
           <div className={s.share}>
             <button type="button" aria-label="Telegram" onClick={share("https://t.me/share/url?url=")}>
-              <Send size={16} />
+              <TelegramIcon size={16} />
             </button>
             <button type="button" aria-label="Facebook" onClick={share("https://www.facebook.com/sharer/sharer.php?u=")}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>

@@ -1,6 +1,7 @@
 "use client";
 
 import { publicUrl } from "@/lib/public-url";
+import { TelegramIcon } from "@/components/TelegramIcon";
 
 /** Opens Telegram's share sheet with an invitation link (app-relative path) and a message. */
 export function TelegramShareButton({
@@ -22,11 +23,7 @@ export function TelegramShareButton({
       "noopener,noreferrer",
     );
   }
-  const icon = (
-    <svg width={compact ? 14 : 16} height={compact ? 14 : 16} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M21.5 3.5 2.8 10.8c-1 .4-1 1.6 0 1.9l4.7 1.5 1.8 5.6c.3.8 1.2 1 1.8.4l2.6-2.4 4.7 3.5c.7.5 1.6.1 1.8-.7l3-15.6c.2-1-.8-1.8-1.7-1.5zM9.6 14.3l-.4 3.6-1.3-4.1 9.7-6.4z" />
-    </svg>
-  );
+  const icon = <TelegramIcon size={compact ? 14 : 16} />;
   if (compact) {
     return (
       <button
