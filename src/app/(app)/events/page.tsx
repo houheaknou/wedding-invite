@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, MapPin, Plus, Users } from "lucide-react";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireUser } from "@/features/auth/session";
 import { fmt, getDict } from "@/lib/i18n";
 import { coverUrl, daysUntil, formatDateTime } from "@/lib/format";
 import { btnPrimary, card, chip, coverFit } from "@/components/ui";

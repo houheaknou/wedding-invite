@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { CalendarClock, Check, CheckCheck, Download, Pencil, PiggyBank, Plus, Receipt, Trash2, Upload, Wallet } from "lucide-react";
 import { prisma } from "@/lib/db";
-import { requireOwnedEvent } from "@/lib/auth";
+import { requireOwnedEvent } from "@/features/auth/session";
 import { fmt, getDict } from "@/lib/i18n";
-import { CATEGORY_STYLE, EXPENSE_CATEGORIES, formatMoney, payStatus } from "@/lib/expenses";
-import { addExpense, deleteExpense, importExpenses, toggleExpensePaid, updateBudget, updateExpense } from "@/actions/expenses";
+import { CATEGORY_STYLE, EXPENSE_CATEGORIES, formatMoney, payStatus } from "@/features/expenses/shared";
+import { addExpense, deleteExpense, importExpenses, toggleExpensePaid, updateBudget, updateExpense } from "@/features/expenses/actions";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { Dropdown } from "@/components/Dropdown";
-import { BudgetForm, ExpenseForm, type ExpenseRow } from "@/components/ExpenseForms";
+import { BudgetForm, ExpenseForm, type ExpenseRow } from "@/features/expenses/ExpenseForms";
 import { ImportForm } from "@/components/ImportForm";
 import { Modal } from "@/components/Modal";
 import { btnIcon, btnPrimary, btnSecondary, card } from "@/components/ui";

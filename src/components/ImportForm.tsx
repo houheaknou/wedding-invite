@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { FileSpreadsheet, Upload } from "lucide-react";
-import type { ImportState } from "@/actions/guests";
+import type { ImportState } from "@/features/guests/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { btnPrimary, ErrorText } from "@/components/ui";
 import type { ImportFormDict } from "@/lib/ui-keys";

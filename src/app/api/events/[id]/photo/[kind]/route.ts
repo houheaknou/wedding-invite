@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
-import { parseKind, photoResponse } from "@/lib/photos";
+import { getCurrentUser } from "@/features/auth/session";
+import { parseKind, photoResponse } from "@/features/invitation/photos";
 
 /** Owner-only event photo (couple portraits, venue), used by the builder preview. */
 export async function GET(_: Request, { params }: { params: Promise<{ id: string; kind: string }> }) {

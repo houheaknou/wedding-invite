@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { CalendarHeart, LogOut, UserRound } from "lucide-react";
-import { requireUser } from "@/lib/auth";
+import { requireUser } from "@/features/auth/session";
 import { getDict } from "@/lib/i18n";
-import { logout } from "@/actions/auth";
+import { logout } from "@/features/auth/actions";
 import { Dropdown } from "@/components/Dropdown";
 import { LangSwitch } from "@/components/LangSwitch";
 import { Logo } from "@/components/Logo";

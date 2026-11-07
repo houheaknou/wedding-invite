@@ -13,16 +13,16 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import { parseAgenda } from "@/lib/agenda";
+import { parseAgenda } from "@/features/invitation/agenda";
 import { prisma } from "@/lib/db";
-import { requireOwnedEvent } from "@/lib/auth";
+import { requireOwnedEvent } from "@/features/auth/session";
 import { fmt, getDict } from "@/lib/i18n";
 import { coverUrl, daysUntil, formatDateTime } from "@/lib/format";
 import { SIDES, STATUS_COLOR, STATUSES } from "@/lib/constants";
-import { deleteEvent } from "@/actions/events";
+import { deleteEvent } from "@/features/events/actions";
 import { ConfirmButton } from "@/components/ConfirmButton";
-import { Donut } from "@/components/Donut";
-import { FinanceSummary } from "@/components/FinanceSummary";
+import { Donut } from "@/features/dashboard/Donut";
+import { FinanceSummary } from "@/features/dashboard/FinanceSummary";
 import { btnDanger, btnPrimary, card, chip, coverFit } from "@/components/ui";
 
 const RSVP_CHIP: Record<RsvpAnswer, string> = {

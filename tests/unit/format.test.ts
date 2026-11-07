@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseLocalDateTime, toLocalInputValue } from "@/lib/format";
-import { parseAgenda, serializeAgenda } from "@/lib/agenda";
+import { parseAgenda, serializeAgenda } from "@/features/invitation/agenda";
 
 describe("event times are Cambodia time (UTC+7)", () => {
   it("reads a datetime-local value as Phnom Penh time", () => {

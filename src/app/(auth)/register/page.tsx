@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getDict } from "@/lib/i18n";
-import { AuthForm } from "@/components/AuthForm";
-import { SocialLogin } from "@/components/SocialLogin";
+import { AuthForm } from "@/features/auth/AuthForm";
+import { SocialLogin } from "@/features/auth/SocialLogin";
 import { pick, AUTH_KEYS } from "@/lib/ui-keys";
 
 export default async function RegisterPage() {

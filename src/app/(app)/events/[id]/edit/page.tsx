@@ -1,8 +1,8 @@
-import { updateEvent } from "@/actions/events";
-import { requireOwnedEvent } from "@/lib/auth";
+import { updateEvent } from "@/features/events/actions";
+import { requireOwnedEvent } from "@/features/auth/session";
 import { getDict } from "@/lib/i18n";
 import { coverUrl, toLocalInputValue } from "@/lib/format";
-import { EventForm } from "@/components/EventForm";
+import { EventForm } from "@/features/events/EventForm";
 import { card } from "@/components/ui";
 import { pick, EVENT_FORM_KEYS } from "@/lib/ui-keys";
 

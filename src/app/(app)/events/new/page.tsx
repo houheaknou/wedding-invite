@@ -1,6 +1,6 @@
-import { createEvent } from "@/actions/events";
+import { createEvent } from "@/features/events/actions";
 import { getDict } from "@/lib/i18n";
-import { EventForm } from "@/components/EventForm";
+import { EventForm } from "@/features/events/EventForm";
 import { card } from "@/components/ui";
 import { pick, EVENT_FORM_KEYS } from "@/lib/ui-keys";
 

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/features/auth/session";
 import { getDict } from "@/lib/i18n";
 import { LangSwitch } from "@/components/LangSwitch";
 import { Logo } from "@/components/Logo";

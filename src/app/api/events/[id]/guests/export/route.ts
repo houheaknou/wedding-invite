@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/features/auth/session";
 import { getDict } from "@/lib/i18n";
-import { buildCsv, buildXlsx } from "@/lib/guest-io";
+import { buildCsv, buildXlsx } from "@/features/guests/io";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();

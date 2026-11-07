@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
-import { googleEnabled, googleRedirectUri } from "@/lib/social-auth";
+import { getCurrentUser } from "@/features/auth/session";
+import { googleEnabled, googleRedirectUri } from "@/features/auth/social";
 
 const cookie = { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/api/auth/google", maxAge: 600 } as const;
 

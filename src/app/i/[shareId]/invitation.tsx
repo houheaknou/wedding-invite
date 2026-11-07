@@ -4,12 +4,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/features/auth/session";
 import { getDict } from "@/lib/i18n";
-import { INVITE_TEXT, type InviteLang } from "@/lib/invitation";
-import { resolveMapLinks } from "@/lib/map-embed";
-import { galleryUrls, photoUrls, toInvitationData } from "@/lib/media";
-import { InvitationView } from "@/components/InvitationView";
+import { INVITE_TEXT, type InviteLang } from "@/features/invitation/shared";
+import { resolveMapLinks } from "@/features/invitation/map-embed";
+import { galleryUrls, photoUrls, toInvitationData } from "@/features/invitation/media";
+import { InvitationView } from "@/features/invitation/templates/InvitationView";
 
 /**
  * Invitation by share id (and optional guest), or null. Cached per request.

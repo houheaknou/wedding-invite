@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Globe } from "lucide-react";
-import { setLanguage } from "@/actions/auth";
+import { setLanguage } from "@/features/auth/actions";
 
 const LABELS = { km: "ភាសាខ្មែរ", en: "English" } as const;
 

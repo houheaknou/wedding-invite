@@ -1,10 +1,10 @@
 import bcrypt from "bcryptjs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/db";
-import { login } from "@/actions/auth";
-import { deleteExpense } from "@/actions/expenses";
-import { deleteGuest } from "@/actions/guests";
-import { submitRsvp } from "@/actions/rsvp";
+import { login } from "@/features/auth/actions";
+import { deleteExpense } from "@/features/expenses/actions";
+import { deleteGuest } from "@/features/guests/actions";
+import { submitRsvp } from "@/features/invitation/rsvp-actions";
 import { resetDb } from "../support/db";
 import { currentRequest, newRequest } from "../support/next-mocks";
 

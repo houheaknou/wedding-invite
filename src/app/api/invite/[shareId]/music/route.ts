@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { serveMusic } from "@/lib/media";
+import { serveMusic } from "@/features/invitation/media";
 
 /** Public music stream for a published invitation. */
 export async function GET(req: Request, { params }: { params: Promise<{ shareId: string }> }) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { embedFromLink, openLinkFrom } from "@/lib/map-embed";
+import { embedFromLink, openLinkFrom } from "@/features/invitation/map-embed";
 
 const place =
   "https://www.google.com/maps/place/Sokha+Phnom+Penh+Hotel/@11.5732,104.9301,17z/data=!3m1!4b1!4m6!3m5!1s0x0:0x0!8m2!3d11.5735!4d104.9312?entry=ttu&g_ep=abc";

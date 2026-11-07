@@ -1,4 +1,4 @@
-import { requireOwnedEvent } from "@/lib/auth";
+import { requireOwnedEvent } from "@/features/auth/session";
 import { getDict } from "@/lib/i18n";
 import { WorkspaceTabs } from "@/components/WorkspaceTabs";
 

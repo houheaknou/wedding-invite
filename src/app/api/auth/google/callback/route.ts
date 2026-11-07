@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
-import { createSession, getCurrentUser } from "@/lib/auth";
-import { appOrigin, googleEnabled, googleProfile, linkSocial, LinkRequiresLogin, SocialIdTaken, userForSocial } from "@/lib/social-auth";
+import { createSession, getCurrentUser } from "@/features/auth/session";
+import { appOrigin, googleEnabled, googleProfile, linkSocial, LinkRequiresLogin, SocialIdTaken, userForSocial } from "@/features/auth/social";
 
 /** Google sends the user back here with ?code&state. */
 export async function GET(req: NextRequest) {

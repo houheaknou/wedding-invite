@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/db";
-import { linkSocial, LinkRequiresLogin, SocialIdTaken, userForSocial } from "@/lib/social-auth";
+import { linkSocial, LinkRequiresLogin, SocialIdTaken, userForSocial } from "@/features/auth/social";
 import { resetDb } from "../support/db";
 
 const google = (id: string, email: string | null = null) => ({ provider: "google" as const, id, name: "Sok Dara", email });

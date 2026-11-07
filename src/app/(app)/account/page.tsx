@@ -1,9 +1,9 @@
 import { Check } from "lucide-react";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
-import { googleEnabled } from "@/lib/social-auth";
+import { requireUser } from "@/features/auth/session";
+import { googleEnabled } from "@/features/auth/social";
 import { getDict } from "@/lib/i18n";
-import { PasswordForm, ProfileForm } from "@/components/AccountForms";
+import { PasswordForm, ProfileForm } from "@/features/auth/AccountForms";
 import { Avatar } from "@/components/ui";
 import { pick, ACCOUNT_KEYS } from "@/lib/ui-keys";
 

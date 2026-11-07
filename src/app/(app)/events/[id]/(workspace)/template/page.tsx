@@ -1,14 +1,14 @@
-import { addGalleryPhoto, deleteGalleryPhoto } from "@/actions/gallery";
-import { saveInvitation } from "@/actions/invitation";
+import { addGalleryPhoto, deleteGalleryPhoto } from "@/features/invitation/gallery-actions";
+import { saveInvitation } from "@/features/invitation/actions";
 import { prisma } from "@/lib/db";
-import { requireOwnedEvent } from "@/lib/auth";
+import { requireOwnedEvent } from "@/features/auth/session";
 import { getDict } from "@/lib/i18n";
 import { coverUrl, toLocalInputValue } from "@/lib/format";
-import { parseAgenda } from "@/lib/agenda";
-import type { InviteLang, TemplateId } from "@/lib/invitation";
-import { resolveMapEmbed } from "@/lib/map-embed";
-import { ensureInvitation, photoUrls } from "@/lib/media";
-import { TemplateEditor } from "@/components/TemplateEditor";
+import { parseAgenda } from "@/features/invitation/agenda";
+import type { InviteLang, TemplateId } from "@/features/invitation/shared";
+import { resolveMapEmbed } from "@/features/invitation/map-embed";
+import { ensureInvitation, photoUrls } from "@/features/invitation/media";
+import { TemplateEditor } from "@/features/invitation/editor/TemplateEditor";
 import { pick, TEMPLATE_EDITOR_KEYS } from "@/lib/ui-keys";
 
 export default async function TemplatePage({ params }: { params: Promise<{ id: string }> }) {

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { parseKind, photoResponse } from "@/lib/photos";
+import { parseKind, photoResponse } from "@/features/invitation/photos";
 
 /** Public event photo for a published invitation. */
 export async function GET(_: Request, { params }: { params: Promise<{ shareId: string; kind: string }> }) {

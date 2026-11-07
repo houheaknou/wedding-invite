@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { formatMoney, payStatus } from "@/lib/expenses";
-import { giftTotals } from "@/lib/gifts";
+import { formatMoney, payStatus } from "@/features/expenses/shared";
+import { giftTotals } from "@/features/gifts/shared";
 
 describe("formatMoney", () => {
   it("shows dollars without cents when whole, with two decimals otherwise", () => {

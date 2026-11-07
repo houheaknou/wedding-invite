@@ -1,6 +1,6 @@
 import { createHash, createHmac } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { telegramProfile } from "@/lib/social-auth";
+import { telegramProfile } from "@/features/auth/social";
 
 // A made-up bot token: only used to sign test payloads the same way Telegram does.
 const TOKEN = "123456:TEST-token-for-unit-tests";

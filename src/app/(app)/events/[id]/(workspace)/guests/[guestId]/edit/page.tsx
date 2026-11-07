@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
-import { updateGuest } from "@/actions/guests";
+import { updateGuest } from "@/features/guests/actions";
 import { prisma } from "@/lib/db";
-import { requireOwnedEvent } from "@/lib/auth";
+import { requireOwnedEvent } from "@/features/auth/session";
 import { getDict } from "@/lib/i18n";
-import { GuestForm } from "@/components/GuestForm";
+import { GuestForm } from "@/features/guests/GuestForm";
 import { Avatar, card } from "@/components/ui";
 import { pick, GUEST_FORM_KEYS } from "@/lib/ui-keys";
 

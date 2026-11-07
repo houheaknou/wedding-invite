@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/features/auth/session";
 
 /** Owner-only gallery photo, used by the builder and draft previews. */
 export async function GET(_: Request, { params }: { params: Promise<{ id: string; photoId: string }> }) {

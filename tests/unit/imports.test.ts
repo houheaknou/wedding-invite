@@ -1,8 +1,9 @@
 import ExcelJS from "exceljs";
 import { describe, expect, it } from "vitest";
-import { parseExpenseFile } from "@/lib/expense-io";
-import { parseGiftFile } from "@/lib/gift-io";
-import { IMPORT_MAX_BYTES, IMPORT_MAX_ROWS, isSupportedFile, parseGuestFile } from "@/lib/guest-io";
+import { parseExpenseFile } from "@/features/expenses/io";
+import { parseGiftFile } from "@/features/gifts/io";
+import { parseGuestFile } from "@/features/guests/io";
+import { IMPORT_MAX_BYTES, IMPORT_MAX_ROWS, isSupportedFile } from "@/lib/spreadsheet";
 
 const csv = (rows: (string | number)[][], name = "list.csv") =>
   new File(["﻿" + rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n")], name, { type: "text/csv" });

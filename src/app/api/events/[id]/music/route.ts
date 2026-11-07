@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
-import { serveMusic } from "@/lib/media";
+import { getCurrentUser } from "@/features/auth/session";
+import { serveMusic } from "@/features/invitation/media";
 
 /** Owner-only music stream, used by the template editor preview. */
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {

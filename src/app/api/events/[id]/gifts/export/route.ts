@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/features/auth/session";
 import { getDict } from "@/lib/i18n";
-import { buildGiftCsv, buildGiftXlsx } from "@/lib/gift-io";
+import { buildGiftCsv, buildGiftXlsx } from "@/features/gifts/io";
 
 /** Gift book download: ?format=xlsx | csv, &template=1 for an empty one */
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

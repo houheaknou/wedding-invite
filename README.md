@@ -151,30 +151,50 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 ## Layout
 
+Code is grouped **by feature**: to change gifts, open `src/features/gifts/`. Each feature folder
+holds its server actions, its components and its helpers side by side.
+
 ```
-prisma/schema.prisma        User, Session, Event, Guest
-prisma/seed.ts              demo data
-src/lib/auth.ts             sessions, requireUser, requireOwnedEvent
-src/lib/i18n.ts             km/en dictionaries
-src/lib/guest-io.ts         xlsx/csv parse + build
-src/lib/format.ts           Cambodia-time date helpers, cover URL, countdown
-src/lib/constants.ts        enum lists + chip colors shared with client components
-src/actions/*.ts            server actions (auth, events, guests, import)
-src/app/(auth)/…            login, register
-src/app/(app)/events/…      event list, create/edit
-src/app/(app)/events/[id]/(workspace)/…  tab layout: dashboard, guests (+ guest
-                            edit), coming-soon tabs
-src/app/api/events/[id]/guests/export   xlsx/csv download
-src/app/api/events/[id]/cover           cover photo (owner)
-src/app/api/events/[id]/music           music (owner, for the editor preview)
-src/app/api/invite/[shareId]/{cover,music}  public media for published invitations
-src/app/i/[shareId]/…       public invitation (+ /[guestId] personal link)
-src/components/InvitationView.tsx  invitation renderer shared by preview and public page
-src/components/TemplateEditor.tsx  template editor
-src/lib/invitation.ts       templates, invitation wording, Khmer date formatting
-src/lib/media.ts            music storage/streaming, invitation data mapping
-docs/design-refs/           style references (layout/style only — no assets reused)
+src/
+  app/                        routes only (Next.js needs them here) — pages import from features/
+    (auth)/login, register    sign in / sign up
+    (app)/account             my account
+    (app)/events/…            event list, new, edit
+    (app)/events/[id]/(workspace)/   tabs: dashboard, guests, expenses, gifts, template, more
+    i/[shareId]/…             public invitation (+ /[guestId] personal link)
+    api/…                     downloads, photos, music, OAuth callbacks, /api/health
+
+  features/
+    auth/          actions.ts (login/register/logout), account-actions.ts, session.ts
+                   (sessions, requireUser, requireOwnedEvent), social.ts (Google/Telegram),
+                   AuthForm, SocialLogin, AccountForms, PasswordInput, TelegramWidget
+    events/        actions.ts (create/edit/delete event), EventForm
+    dashboard/     FinanceSummary (income/expense/profit), Donut chart
+    guests/        actions.ts, io.ts (xlsx/csv import/export), GuestForm, GuestFilters, GuestPicker
+    expenses/      actions.ts, io.ts (budget sheet import/export), shared.ts (categories,
+                   formatMoney, payStatus), ExpenseForms
+    gifts/         actions.ts, io.ts (gift book import/export), shared.ts (totals), GiftForms
+    invitation/    actions.ts (design, photos, music), gallery-actions.ts, rsvp-actions.ts
+                   shared.ts (templates, wording, invitation data), agenda.ts, map-embed.ts,
+                   media.ts (music), photos.ts, owner-data.ts, fonts.ts, crop-qr.ts (KHQR crop)
+      editor/      TemplateEditor, TemplateStore, GalleryManager
+      templates/   InvitationView, MusicButton, GiftQr, royal/, petal/, olive/, lotus/
+
+  components/      shared UI used by several features (ui.tsx styles, Modal, Dropdown,
+                   ConfirmButton, SubmitButton, ImportForm, WorkspaceTabs, Logo, LangSwitch…)
+  lib/             shared infrastructure: db, i18n (km/en dictionaries), ui-keys, parse,
+                   format (Cambodia-time dates), constants, file-check (upload sniffing),
+                   rate-limit, spreadsheet (xlsx/csv reading), public-url
+  fonts/           bundled font files
+
+prisma/            schema.prisma, migrations/, seed.ts
+tests/             unit/ and db/ suites (see tests/README.md)
+docs/              code review report, design notes
 ```
+
+**Where does new code go?** Used by one feature → that feature's folder. Used by two or more →
+`components/` (UI) or `lib/` (logic). Server actions live in the feature as `actions.ts`
+(or `<name>-actions.ts` when a feature has several).
 
 Every event/guest action re-checks that the event belongs to the signed-in user.
 
