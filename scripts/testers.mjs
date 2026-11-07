@@ -3,6 +3,7 @@
 //   npm run testers:start   — serve it on port 3000 (the tunnel's target); dev runs on 3001
 // Uses the same .env, database and uploads folder as the dev server. Rebuild after code changes.
 import { spawn } from "node:child_process";
+import { createRequire } from "node:module";
 
 const cmd = process.argv[2];
 if (cmd !== "build" && cmd !== "start") {
@@ -10,9 +11,10 @@ if (cmd !== "build" && cmd !== "start") {
   process.exit(1);
 }
 const args = cmd === "start" ? ["start", "-p", process.env.TESTERS_PORT || "3000"] : ["build"];
-const child = spawn("npx", ["next", ...args], {
+// Run Next's own CLI with this Node directly: no shell, so no argument-escaping concerns (DEP0190)
+const nextBin = createRequire(import.meta.url).resolve("next/dist/bin/next");
+const child = spawn(process.execPath, [nextBin, ...args], {
   stdio: "inherit",
-  shell: process.platform === "win32",
   env: { ...process.env, NEXT_DIST_DIR: ".next-prod" },
 });
 child.on("exit", (code) => process.exit(code ?? 1));
