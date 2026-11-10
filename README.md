@@ -84,6 +84,8 @@ Live at **https://chhynou-mongkolday.vercel.app**: Vercel project `wedding-invit
 | Photos | in the database (shrunk in the browser to 1600px before upload) |
 | Public URL | `NEXT_PUBLIC_APP_URL=https://chhynou-mongkolday.vercel.app` |
 
+- The app runs in Vercel's Singapore region (`vercel.json` → `regions: ["sin1"]`), next to the
+  Neon database. Vercel's default is Washington, which put an ocean between every query and the DB.
 - `npm run vercel-build` (used by Vercel) applies pending Prisma migrations over the direct Neon
   connection, then builds. Schema changes deploy with a normal push.
 - Vercel caps each request at 4.5 MB: keep uploads that go through server actions under that.
