@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { GiftQr, giftQrTitle, hasGiftQr } from "@/features/invitation/templates/GiftQr";
-import { CalendarHeart, Camera, ChevronsUp, Frown, Hand, Heart, House, Link2, MapPin, MessageCircleHeart, Music, PenLine, Send, Users, VolumeX, X } from "lucide-react";
+import { CalendarHeart, Camera, ChevronsUp, Frown, Hand, Heart, House, Link2, MapPin, MessageCircleHeart, Music, PenLine, Phone, Send, Users, VolumeX, X } from "lucide-react";
 import { submitRsvp, type RsvpState } from "@/features/invitation/rsvp-actions";
 import { parseAgenda } from "@/features/invitation/agenda";
 import { royalFontVars } from "@/features/invitation/fonts";
@@ -29,6 +29,7 @@ const T = {
     calendar: "កត់ចូលក្នុងប្រតិទិនរបស់អ្នក",
     programme: "កម្មវិធីពិធី",
     venue: "ទីតាំងកម្មវិធី",
+    contact: "ទំនាក់ទំនង",
     map: "មើលក្នុង Google Map",
     gallery: "កម្រងរូបភាព",
     wishes: "សារជូនពរ",
@@ -70,6 +71,7 @@ const T = {
     calendar: "Add to your calendar",
     programme: "Programme",
     venue: "Venue",
+    contact: "Contact",
     map: "Open in Google Maps",
     gallery: "Gallery",
     wishes: "Wishes",
@@ -428,6 +430,8 @@ export function PetalInvitation({
   const mapQuery = [data.venueEn ?? data.venue, data.address].filter(Boolean).join(", ");
   const mapHref = data.mapUrl ?? (mapQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}` : null);
   const mapSrc = mapEmbedSrc(data);
+  // "Contact phones" from the editor (one per line), shown as tap-to-call buttons under the venue
+  const phones = (data.contactPhones ?? "").split("\n").map((p) => p.trim()).filter(Boolean);
   const id = (x: string) => `${idPrefix}${x}`;
   // Hero photo: the cover, else the first gallery photo, else a couple portrait
   const heroPhoto = data.coverUrl ?? data.galleryUrls[0] ?? data.groomPhotoUrl ?? data.bridePhotoUrl;
@@ -649,7 +653,7 @@ export function PetalInvitation({
       </section>
 
       {/* venue */}
-      {data.showDetails && (mapQuery || mapHref) && (
+      {data.showDetails && (mapQuery || mapHref || phones.length > 0) && (
         <section id={id("venue")} className={s.section}>
           <div className={s.reveal}>
             <SectionHead>{t.venue}</SectionHead>
@@ -673,6 +677,19 @@ export function PetalInvitation({
                 <MapPin size={16} />
                 {t.map}
               </a>
+            )}
+            {phones.length > 0 && (
+              <div className={s.contact}>
+                <p className={s.contactTitle}>{t.contact}</p>
+                <div className={s.phones}>
+                  {phones.map((p) => (
+                    <a key={p} href={`tel:${p.replace(/[^\d+]/g, "")}`}>
+                      <Phone size={14} />
+                      {p}
+                    </a>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </section>
