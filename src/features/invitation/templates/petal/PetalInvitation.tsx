@@ -6,7 +6,7 @@ import { CalendarHeart, Camera, ChevronsUp, Frown, Hand, Heart, House, Link2, Ma
 import { submitRsvp, type RsvpState } from "@/features/invitation/rsvp-actions";
 import { parseAgenda } from "@/features/invitation/agenda";
 import { royalFontVars } from "@/features/invitation/fonts";
-import { formatInviteDate, INVITE_TEXT, type InvitationData, type InviteLang, mapEmbedSrc } from "@/features/invitation/shared";
+import { formatInviteDate, INVITE_TEXT, type InvitationData, type InviteLang, mapEmbedSrc, contactPhoneList } from "@/features/invitation/shared";
 import s from "./petal.module.css";
 import { TelegramIcon } from "@/components/TelegramIcon";
 
@@ -431,7 +431,7 @@ export function PetalInvitation({
   const mapHref = data.mapUrl ?? (mapQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}` : null);
   const mapSrc = mapEmbedSrc(data);
   // "Contact phones" from the editor (one per line), shown as tap-to-call buttons under the venue
-  const phones = (data.contactPhones ?? "").split("\n").map((p) => p.trim()).filter(Boolean);
+  const phones = contactPhoneList(data.contactPhones);
   const id = (x: string) => `${idPrefix}${x}`;
   // Hero photo: the cover, else the first gallery photo, else a couple portrait
   const heroPhoto = data.coverUrl ?? data.galleryUrls[0] ?? data.groomPhotoUrl ?? data.bridePhotoUrl;
@@ -682,10 +682,10 @@ export function PetalInvitation({
               <div className={s.contact}>
                 <p className={s.contactTitle}>{t.contact}</p>
                 <div className={s.phones}>
-                  {phones.map((p) => (
-                    <a key={p} href={`tel:${p.replace(/[^\d+]/g, "")}`}>
+                  {phones.map(({ label, tel }) => (
+                    <a key={tel} href={`tel:${tel}`}>
                       <Phone size={14} />
-                      {p}
+                      {label}
                     </a>
                   ))}
                 </div>

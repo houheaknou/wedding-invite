@@ -224,3 +224,21 @@ export function formatInviteDate(iso: string, lang: InviteLang) {
 }
 
 export const formatInviteNumber = (n: number, lang: InviteLang) => (lang === "km" ? khmerDigits(n) : String(n));
+
+/**
+ * The contact phones typed in the editor (one per line), cleaned up for display: blank lines dropped
+ * and the same number entered twice shown once (compared by digits, so "016 300 247" = "016300247").
+ * Each comes with its tel: link.
+ */
+export function contactPhoneList(raw: string | null | undefined): { label: string; tel: string }[] {
+  const seen = new Set<string>();
+  const out: { label: string; tel: string }[] = [];
+  for (const line of (raw ?? "").split("\n")) {
+    const label = line.trim().replace(/\s+/g, " ");
+    const tel = label.replace(/[^\d+]/g, "");
+    if (!tel || seen.has(tel)) continue;
+    seen.add(tel);
+    out.push({ label, tel });
+  }
+  return out;
+}

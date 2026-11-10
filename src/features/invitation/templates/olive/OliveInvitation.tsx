@@ -8,7 +8,7 @@ import { submitRsvp, type RsvpState } from "@/features/invitation/rsvp-actions";
 import { MusicButton } from "@/features/invitation/templates/MusicButton";
 import { parseAgenda } from "@/features/invitation/agenda";
 import { royalFontVars } from "@/features/invitation/fonts";
-import { formatInviteDate, INVITE_TEXT, type InvitationData, mapEmbedSrc } from "@/features/invitation/shared";
+import { formatInviteDate, INVITE_TEXT, type InvitationData, mapEmbedSrc, contactPhoneList } from "@/features/invitation/shared";
 import s from "./olive.module.css";
 
 const KM_DIGITS = "០១២៣៤៥៦៧៨៩";
@@ -278,10 +278,7 @@ export function OliveInvitation({
   const mapQuery = [data.venueEn ?? data.venue, data.address].filter(Boolean).join(", ");
   const mapHref = data.mapUrl ?? (mapQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}` : null);
   const mapSrc = mapEmbedSrc(data);
-  const phones = (data.contactPhones ?? "")
-    .split("\n")
-    .map((p) => p.trim())
-    .filter(Boolean);
+  const phones = contactPhoneList(data.contactPhones);
   const dateLine = formatInviteDate(data.startsAt, "km");
   const dateOnly = dateLine.split(" វេលាម៉ោង")[0];
 
@@ -429,9 +426,9 @@ export function OliveInvitation({
             <>
               <h3 className={s.contactsTitle}>ទំនាក់ទំនងម្ចាស់ដើមការ</h3>
               <div className={s.phones}>
-                {phones.map((p) => (
-                  <a key={p} href={`tel:${p.replace(/[^\d+]/g, "")}`}>
-                    {p}
+                {phones.map(({ label, tel }) => (
+                  <a key={tel} href={`tel:${tel}`}>
+                    {label}
                   </a>
                 ))}
               </div>

@@ -6,7 +6,7 @@ import { submitRsvp, type RsvpState } from "@/features/invitation/rsvp-actions";
 import { MusicButton } from "@/features/invitation/templates/MusicButton";
 import { parseAgenda } from "@/features/invitation/agenda";
 import { lotusFontVars } from "@/features/invitation/fonts";
-import { formatInviteDate, INVITE_TEXT, type InvitationData, type InviteLang, mapEmbedSrc } from "@/features/invitation/shared";
+import { formatInviteDate, INVITE_TEXT, type InvitationData, type InviteLang, mapEmbedSrc, contactPhoneList } from "@/features/invitation/shared";
 import s from "./lotus.module.css";
 
 const T = {
@@ -653,7 +653,7 @@ export function LotusInvitation({
   const days = parseAgenda(data.agenda).filter((d) => d.items.length);
   const groomParents = lang === "en" ? data.groomParentsEn || data.groomParents : data.groomParents || data.groomParentsEn;
   const brideParents = lang === "en" ? data.brideParentsEn || data.brideParents : data.brideParents || data.brideParentsEn;
-  const phones = (data.contactPhones ?? "").split("\n").map((p) => p.trim()).filter(Boolean);
+  const phones = contactPhoneList(data.contactPhones);
 
   const showVenue = data.showDetails && (!!venueName || !!data.address || !!mapHref);
   const showProgramme = data.showAgenda && days.length > 0;
@@ -1027,9 +1027,9 @@ export function LotusInvitation({
                       <div>
                         <p className={s.infoL}>{t.phoneL}</p>
                         <p className={s.infoV}>
-                          {phones.map((p) => (
-                            <a key={p} href={`tel:${p.replace(/[^\d+]/g, "")}`} style={{ display: "block" }}>
-                              {p}
+                          {phones.map(({ label, tel }) => (
+                            <a key={tel} href={`tel:${tel}`} style={{ display: "block" }}>
+                              {label}
                             </a>
                           ))}
                         </p>

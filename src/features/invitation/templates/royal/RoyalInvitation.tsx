@@ -11,6 +11,7 @@ import {
   type InvitationData,
   type InviteLang,
   mapEmbedSrc,
+  contactPhoneList,
 } from "@/features/invitation/shared";
 import s from "./royal.module.css";
 
@@ -409,7 +410,7 @@ export function RoyalInvitation({
       : null);
   const mapSrc = mapEmbedSrc(data);
   // "Contact phones" from the editor (one per line), shown as tap-to-call buttons under the venue
-  const phones = (data.contactPhones ?? "").split("\n").map((p) => p.trim()).filter(Boolean);
+  const phones = contactPhoneList(data.contactPhones);
   // Share targets are built on click so server and client render the same markup
   const share = (base: string) => () =>
     window.open(
@@ -706,12 +707,12 @@ export function RoyalInvitation({
                     <div className={s.contact}>
                       <p>{t.contact}</p>
                       <div className={s.phones}>
-                        {phones.map((p) => (
-                          <a key={p} href={`tel:${p.replace(/[^\d+]/g, "")}`}>
+                        {phones.map(({ label, tel }) => (
+                          <a key={tel} href={`tel:${tel}`}>
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                               <path d="M6.5 3.5h3l1.5 4-2 1.5a11 11 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 4.5 5.5a2 2 0 0 1 2-2z" />
                             </svg>
-                            {p}
+                            {label}
                           </a>
                         ))}
                       </div>
