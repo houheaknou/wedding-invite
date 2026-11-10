@@ -1,10 +1,14 @@
 "use client";
 
-import { LotusInvitation } from "@/features/invitation/templates/lotus/LotusInvitation";
-import { OliveInvitation } from "@/features/invitation/templates/olive/OliveInvitation";
-import { PetalInvitation } from "@/features/invitation/templates/petal/PetalInvitation";
-import { RoyalInvitation } from "@/features/invitation/templates/royal/RoyalInvitation";
+import dynamic from "next/dynamic";
 import type { InvitationData } from "@/features/invitation/shared";
+
+// Each template is its own code chunk: a page downloads only the template it shows (a guest
+// opening a Petal invitation doesn't load Royal, Lotus and Olive). Still rendered on the server.
+const LotusInvitation = dynamic(() => import("@/features/invitation/templates/lotus/LotusInvitation").then((m) => m.LotusInvitation));
+const OliveInvitation = dynamic(() => import("@/features/invitation/templates/olive/OliveInvitation").then((m) => m.OliveInvitation));
+const PetalInvitation = dynamic(() => import("@/features/invitation/templates/petal/PetalInvitation").then((m) => m.PetalInvitation));
+const RoyalInvitation = dynamic(() => import("@/features/invitation/templates/royal/RoyalInvitation").then((m) => m.RoyalInvitation));
 
 /** Picks the template renderer; anything unknown (e.g. a removed template) shows as Royal gold. */
 export function InvitationView({

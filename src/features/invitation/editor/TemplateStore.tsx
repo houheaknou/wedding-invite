@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { Check, Eye, Pencil, Sparkles, Users } from "lucide-react";
 import { InvitationView } from "@/features/invitation/templates/InvitationView";
@@ -51,9 +51,12 @@ export function TemplateStore({
             >
               {/* live mini preview */}
               <div className="relative h-[300px] overflow-hidden bg-stone-100">
-                <div className="pointer-events-none absolute left-1/2 top-0 w-[375px] origin-top -translate-x-1/2 scale-[0.6]" aria-hidden>
-                  <InvitationView data={preview} heroClassName="min-h-[500px]" idPrefix={`s-${tpl.id}-`} thumbnail />
-                </div>
+                <DeferredThumbnail>
+                  <div className="pointer-events-none absolute left-1/2 top-0 w-[375px] origin-top -translate-x-1/2 scale-[0.6]" aria-hidden>
+                    {/* no map in the thumbnail: it's below the visible part, and each Google map is a whole page to load */}
+                    <InvitationView data={{ ...preview, showMap: false }} heroClassName="min-h-[500px]" idPrefix={`s-${tpl.id}-`} thumbnail />
+                  </div>
+                </DeferredThumbnail>
                 <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium text-brand-700 shadow-sm">
                   Wedding
                 </span>
@@ -125,5 +128,34 @@ export function TemplateStore({
         })}
       </div>
     </section>
+  );
+}
+
+/**
+ * The live mini preview is built in the browser once its card is (nearly) on screen, so the page
+ * itself opens straight away instead of waiting for four full invitations to render.
+ */
+function DeferredThumbnail({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShow(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <div ref={ref} className="absolute inset-0">
+      {show ? children : <div className="absolute inset-4 animate-pulse rounded-xl bg-gradient-to-b from-brand-50 to-stone-100" />}
+    </div>
   );
 }

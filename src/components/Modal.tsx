@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useRef, type ReactNode } from "react";
+import { createContext, useContext, useRef, useState, type ReactNode } from "react";
 import { X } from "lucide-react";
 
 const CloseContext = createContext<() => void>(() => {});
@@ -21,10 +21,17 @@ export function Modal({
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  // The content is built on first open, then kept: pages with a modal per row (edit forms, previews)
+  // don't render every hidden one up front
+  const [opened, setOpened] = useState(false);
   const close = () => ref.current?.close();
+  const open = () => {
+    setOpened(true);
+    ref.current?.showModal();
+  };
   return (
     <>
-      <button type="button" className={triggerClassName} onClick={() => ref.current?.showModal()}>
+      <button type="button" className={triggerClassName} onClick={open}>
         {trigger}
       </button>
       <dialog
@@ -46,7 +53,7 @@ export function Modal({
           </button>
         </div>
         <div className="p-5">
-          <CloseContext.Provider value={close}>{children}</CloseContext.Provider>
+          {opened && <CloseContext.Provider value={close}>{children}</CloseContext.Provider>}
         </div>
       </dialog>
     </>
