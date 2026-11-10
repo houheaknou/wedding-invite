@@ -695,6 +695,16 @@ export function PetalInvitation({
         </section>
       )}
 
+      {/* ចំណងដៃ: bank KHQR (before the gallery, so guests find it straight after the venue) */}
+      {hasGiftQr(data) && (
+        <section id={id("gift")} className={s.section}>
+          <div className={s.reveal}>
+            <SectionHead>{giftQrTitle(lang)}</SectionHead>
+            <GiftQr data={data} lang={lang} accent="#b07a45" />
+          </div>
+        </section>
+      )}
+
       {/* gallery */}
       {photos.length > 0 && (
         <section id={id("gallery")} className={s.section}>
@@ -708,16 +718,6 @@ export function PetalInvitation({
                 <img src={src} alt="" loading="lazy" />
               </button>
             ))}
-          </div>
-        </section>
-      )}
-
-      {/* ចំណងដៃ: bank KHQR */}
-      {hasGiftQr(data) && (
-        <section id={id("gift")} className={s.section}>
-          <div className={s.reveal}>
-            <SectionHead>{giftQrTitle(lang)}</SectionHead>
-            <GiftQr data={data} lang={lang} accent="#b07a45" />
           </div>
         </section>
       )}
