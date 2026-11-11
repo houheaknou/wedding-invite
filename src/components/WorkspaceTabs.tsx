@@ -39,6 +39,8 @@ export function WorkspaceTabs({ eventId, labels }: { eventId: string; labels: Ta
             <li key={slug} className="flex-1 sm:flex-none">
               <Link
                 href={slug ? `${base}/${slug}` : base}
+                // load every tab in the background once the bar is on screen, so a tap shows it at once
+                prefetch
                 aria-current={isActive ? "page" : undefined}
                 onClick={(e) => {
                   if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0 || slug === current) return;

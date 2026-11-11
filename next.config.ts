@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
       // Guest imports, cover photos and invitation music (≤10MB) go through server actions
       bodySizeLimit: "12mb",
     },
+    // Re-use a tab just visited (or prefetched) for 30 s instead of asking the server again; saving
+    // anything still refreshes it straight away (the actions call revalidatePath)
+    staleTimes: { dynamic: 30 },
   },
   serverExternalPackages: ["exceljs"],
   // No floating "N" dev badge: testers use the dev server through the public tunnel link.
