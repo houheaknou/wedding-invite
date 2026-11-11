@@ -49,7 +49,7 @@
 .ready .reveal:not(.in) { opacity: 0; transform: translateY(26px); }
 
 /* ---------- top controls ---------- */
-.topBar { position: sticky; top: 10px; z-index: 40; height: 0; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 12px; }
+.topBar { position: sticky; top: calc(10px + env(safe-area-inset-top)); z-index: 40; height: 0; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 12px; }
 .langSwitch, .soundPill {
   display: inline-flex; align-items: center; gap: 6px; border: 0; cursor: pointer;
   padding: 4px 6px 4px 10px; border-radius: 99px; font: 500 12px var(--km-body);
@@ -290,7 +290,7 @@ button.map { display: block; width: 100%; height: auto; padding: 0; cursor: zoom
 .share button:hover { transform: translateY(-3px); }
 
 /* ---------- bottom dock ---------- */
-.dockWrap { position: sticky; bottom: 14px; z-index: 40; height: 0; display: flex; justify-content: center; align-items: flex-end; pointer-events: none; }
+.dockWrap { position: sticky; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 40; height: 0; display: flex; justify-content: center; align-items: flex-end; pointer-events: none; }
 .dock {
   pointer-events: auto; display: flex; gap: 2px; padding: 4px; border-radius: 99px;
   background: rgba(255, 252, 245, 0.72); backdrop-filter: blur(10px); box-shadow: 0 6px 18px rgba(60, 40, 10, 0.14), 0 0 0 1px color-mix(in srgb, var(--gold) 20%, transparent) inset;

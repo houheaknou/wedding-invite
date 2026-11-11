@@ -15,7 +15,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="relative isolate min-h-screen">
       <FloatingDecor />
-      <header className="sticky top-0 z-30 border-b border-brand-100/70 bg-white/90 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-brand-100/70 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2.5">
           <Logo name={t.appName} href="/events" />
           <Link

@@ -83,7 +83,7 @@ export async function InvitationPage({ shareId, guestId }: { shareId: string; gu
   return (
     <main className="min-h-svh bg-stone-900">
       {draft && t && (
-        <div className="sticky top-0 z-50 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-amber-400 px-4 py-2 text-center text-sm text-amber-950">
+        <div className="sticky top-0 z-50 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-amber-400 px-4 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] text-center text-sm text-amber-950">
           <span>{t.draftBanner}</span>
           <Link href={`/events/${eventId}/template`} className="font-semibold underline">
             {t.openTemplate}

@@ -21,7 +21,10 @@ const inter = localFont({
 
 // The app has no dark theme: "only light" stops phone browsers' auto dark mode (Chrome's
 // "darken websites", Samsung Internet) from repainting the invitations dark.
-export const viewport: Viewport = { colorScheme: "only light" };
+// viewportFit "cover": in-app browsers whose address bar floats over the page (Telegram on iPhone)
+// then report its height as env(safe-area-inset-top), which the sticky bars use to stay clear of it.
+// Everywhere else the inset is 0, so nothing moves.
+export const viewport: Viewport = { colorScheme: "only light", viewportFit: "cover" };
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getDict();
