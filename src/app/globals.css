@@ -76,3 +76,16 @@ dialog::backdrop {
 [hidden] {
   display: none !important;
 }
+
+/*
+ * iPhones (Safari and Chrome on iOS) zoom into any focused field whose text is smaller than 16px and
+ * stay zoomed after typing, so the page looks too wide and cut off. On touch screens every text
+ * field is at least 16px; desktop keeps the smaller sizes from the components.
+ */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
