@@ -189,18 +189,7 @@ export default async function GuestsPage({
           group={group}
           sideCounts={sideCounts}
           groupCounts={groupCounts}
-          removeGroup={removeGroup.bind(null, id)}
-          t={{
-            all: t.all,
-            group: t.group,
-            noGroup: t.noGroup,
-            delete: t.delete,
-            removeGroup: t.removeGroup,
-            removeGroupConfirm: t.removeGroupConfirm,
-            side_BRIDE: t.side_BRIDE,
-            side_GROOM: t.side_GROOM,
-            side_BOTH: t.side_BOTH,
-          }}
+          t={{ all: t.all, group: t.group, noGroup: t.noGroup, side_BRIDE: t.side_BRIDE, side_GROOM: t.side_GROOM, side_BOTH: t.side_BOTH }}
         />
 
         {/* Toolbar */}

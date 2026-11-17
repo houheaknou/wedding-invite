@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { GuestSide } from "@prisma/client";
 import { SIDES } from "@/lib/constants";
-import { RemoveGroupButton } from "@/features/guests/RemoveGroupButton";
 
 /** `?group=` value for guests with no group (shown as the "Other" tab) */
 export const NO_GROUP = "-";
@@ -23,7 +22,6 @@ export function GuestTabs({
   group,
   sideCounts,
   groupCounts,
-  removeGroup,
   t,
 }: {
   sp: Record<string, string | undefined>;
@@ -32,19 +30,7 @@ export function GuestTabs({
   sideCounts: Partial<Record<GuestSide, number>> & { all: number };
   /** groups of the selected side (null = no group), largest first */
   groupCounts: { group: string | null; n: number }[];
-  /** server action: remove a group from its guests (bound to the event) */
-  removeGroup: (group: string) => Promise<void>;
-  t: {
-    all: string;
-    group: string;
-    noGroup: string;
-    delete: string;
-    removeGroup: string;
-    removeGroupConfirm: string;
-  } & Record<
-    `side_${GuestSide}`,
-    string
-  >;
+  t: { all: string; group: string; noGroup: string } & Record<`side_${GuestSide}`, string>;
 }) {
   const href = (changes: { side?: string; group?: string }) => {
     const next = new URLSearchParams();
@@ -93,36 +79,20 @@ export function GuestTabs({
           {[{ group: undefined as string | null | undefined, n: groupTotal }, ...groupCounts].map((g) => {
             const value = g.group === undefined ? undefined : g.group ?? NO_GROUP;
             const active = group === value;
-            // a real group gets an × (not "all" or "no group"); renaming is in the group pick list
-            const editable = Boolean(g.group);
-            const link = (
+            // renaming / deleting a group is in the group pick list (GuestSheet)
+            return (
               <Link
+                key={value ?? "*all"}
                 href={href({ side, group: value })}
                 scroll={false}
                 aria-current={active ? "page" : undefined}
-                className={`inline-flex items-center gap-1.5 rounded-full py-1 pl-3 ${editable ? "pr-1" : "pr-3"}`}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm transition ${
+                  active ? "bg-brand-600 text-white shadow-sm" : "bg-stone-100 text-stone-600 hover:bg-brand-50 hover:text-brand-700"
+                }`}
               >
                 {g.group === undefined ? t.all : g.group ?? t.noGroup}
                 <span className={`text-xs ${active ? "text-white/80" : "text-stone-400"}`}>{g.n}</span>
               </Link>
-            );
-            return (
-              <span
-                key={value ?? "*all"}
-                className={`inline-flex items-center rounded-full text-sm transition ${
-                  active ? "bg-brand-600 text-white shadow-sm" : "bg-stone-100 text-stone-600 hover:bg-brand-50 hover:text-brand-700"
-                }`}
-              >
-                {link}
-                {editable && (
-                  <RemoveGroupButton
-                    remove={removeGroup.bind(null, g.group!)}
-                    leaveHref={active ? href({ side }) : undefined}
-                    active={active}
-                    t={t}
-                  />
-                )}
-              </span>
             );
           })}
         </nav>
