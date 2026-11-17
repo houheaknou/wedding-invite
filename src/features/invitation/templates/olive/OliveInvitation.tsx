@@ -373,20 +373,6 @@ export function OliveInvitation({
         </Card>
       )}
 
-      {/* 4. Gallery */}
-      {data.galleryUrls.length > 0 && (
-        <Card id={id("gallery")}>
-          <h2 className={s.title}>កម្រងរូបភាព</h2>
-          <Ornament />
-          <div className={s.gallery}>
-            {data.galleryUrls.map((src) => (
-              // eslint-disable-next-line @next/next/no-img-element -- user upload
-              <img key={src} src={src} alt="" loading="lazy" />
-            ))}
-          </div>
-        </Card>
-      )}
-
       {/* 5. Venue map, QR, calendar, contacts, signature */}
       {data.showDetails && (
         <Card id={id("venue")}>
@@ -449,6 +435,20 @@ export function OliveInvitation({
           <h2 className={s.title}>{giftQrTitle(data.lang)}</h2>
           <Ornament />
           <GiftQr data={data} lang={data.lang} accent="#6b6b20" />
+        </Card>
+      )}
+
+      {/* 4. Gallery */}
+      {data.galleryUrls.length > 0 && (
+        <Card id={id("gallery")}>
+          <h2 className={s.title}>កម្រងរូបភាព</h2>
+          <Ornament />
+          <div className={s.gallery}>
+            {data.galleryUrls.map((src) => (
+              // eslint-disable-next-line @next/next/no-img-element -- user upload
+              <img key={src} src={src} alt="" loading="lazy" />
+            ))}
+          </div>
         </Card>
       )}
 

@@ -723,6 +723,19 @@ export function RoyalInvitation({
             </>
           )}
 
+          {/* ចំណងដៃ: bank KHQR */}
+          {hasGiftQr(data) && (
+            <>
+              <Join />
+              <section id={`${idPrefix}gift`} className={s.panel}>
+                <Corners />
+                <h2 className={s.secTitle}>{giftQrTitle("km")}</h2>
+                <p className={s.secEn}>Gift via KHQR</p>
+                <GiftQr data={data} lang={lang} accent={data.themeColor} />
+              </section>
+            </>
+          )}
+
           {/* Gallery */}
           {data.galleryUrls.length > 0 && (
             <>
@@ -739,19 +752,6 @@ export function RoyalInvitation({
                     </figure>
                   ))}
                 </div>
-              </section>
-            </>
-          )}
-
-          {/* ចំណងដៃ: bank KHQR */}
-          {hasGiftQr(data) && (
-            <>
-              <Join />
-              <section id={`${idPrefix}gift`} className={s.panel}>
-                <Corners />
-                <h2 className={s.secTitle}>{giftQrTitle("km")}</h2>
-                <p className={s.secEn}>Gift via KHQR</p>
-                <GiftQr data={data} lang={lang} accent={data.themeColor} />
               </section>
             </>
           )}

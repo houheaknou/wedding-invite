@@ -667,8 +667,8 @@ export function LotusInvitation({
     ["invitation", t.nav.invitation, true],
     ["countdown", t.nav.countdown, data.showCountdown],
     ["programme", t.nav.programme, showProgramme],
-    ["gallery", t.nav.gallery, photos.length > 0],
     ["venue", t.nav.venue, showVenue],
+    ["gallery", t.nav.gallery, photos.length > 0],
     ["rsvp", t.nav.rsvp, data.showRsvp],
   ] as const;
 
@@ -970,24 +970,6 @@ export function LotusInvitation({
           </section>
         )}
 
-        {/* E. gallery */}
-        {photos.length > 0 && (
-          <section id={id("gallery")} className={s.sec}>
-            <div className={s.wrap}>
-              <Head eyebrow="Our Moments" title={t.galTitle} />
-              <div className={s.masonry}>
-                {photos.map((src, i) => (
-                  <button key={src} type="button" className={`${s.tile} ${TILE_SHAPES[i % TILE_SHAPES.length]} ${s.reveal}`} onClick={() => setZoom(i)} aria-label={`${t.galTitle} ${i + 1}`}>
-                    {/* eslint-disable-next-line @next/next/no-img-element -- user upload */}
-                    <img src={src} alt="" loading="lazy" />
-                  </button>
-                ))}
-              </div>
-              <p className={s.galHint}>{t.galHint}</p>
-            </div>
-          </section>
-        )}
-
         {/* F. location */}
         {showVenue && (
           <section id={id("venue")} className={`${s.sec} ${s.ivory}`}>
@@ -1068,6 +1050,24 @@ export function LotusInvitation({
               <div className={s.reveal}>
                 <GiftQr data={data} lang={lang} accent="#a8823c" />
               </div>
+            </div>
+          </section>
+        )}
+
+        {/* E. gallery */}
+        {photos.length > 0 && (
+          <section id={id("gallery")} className={s.sec}>
+            <div className={s.wrap}>
+              <Head eyebrow="Our Moments" title={t.galTitle} />
+              <div className={s.masonry}>
+                {photos.map((src, i) => (
+                  <button key={src} type="button" className={`${s.tile} ${TILE_SHAPES[i % TILE_SHAPES.length]} ${s.reveal}`} onClick={() => setZoom(i)} aria-label={`${t.galTitle} ${i + 1}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- user upload */}
+                    <img src={src} alt="" loading="lazy" />
+                  </button>
+                ))}
+              </div>
+              <p className={s.galHint}>{t.galHint}</p>
             </div>
           </section>
         )}
