@@ -49,9 +49,9 @@ export function inviteShareMessage(m: ShareMessageInput): string {
     const groom = clean(m.groomNameEn) || m.groomName;
     const bride = clean(m.brideNameEn) || m.brideName;
     return [
-      "💌✨ Wedding Invitation ✨💌",
+      "✨ Wedding Invitation ✨",
       "",
-      ...(guest ? [`🌸 Dear ${guest} 🌸`, ""] : []),
+      ...(guest ? [`🌸 Dear ${guest}`, ""] : []),
       "💍 With joy in our hearts, we warmly invite you",
       "to celebrate our wedding day with us 🥰",
       "",
@@ -65,7 +65,7 @@ export function inviteShareMessage(m: ShareMessageInput): string {
       "",
       `🤵 ${groom}  💞  ${bride} 👰`,
       "",
-      "👇 Tap to open the invitation 👇",
+      "👇 Tap to open the invitation",
       m.url,
     ].join("\n");
   }
@@ -80,9 +80,9 @@ export function inviteShareMessage(m: ShareMessageInput): string {
   const hello = younger ? "សួស្តី" : "ជំរាបសួរ";
   const invite = younger ? "សូមអញ្ជើញ" : "សូមគោរពអញ្ជើញ";
   return [
-    "💌✨ សំបុត្រអញ្ជើញមង្គលការ ✨💌",
+    "✨ សំបុត្រអញ្ជើញមង្គលការ ✨",
     "",
-    ...(guest ? [`🌸 ${hello} ${named} 🌸`, ""] : []),
+    ...(guest ? [`🌸 ${hello} ${named}`, ""] : []),
     `💍 យើងខ្ញុំទាំងពីរ ${invite}${you}`,
     "មកចូលរួមអបអរសាទរ ពិធីមង្គលការរបស់យើងខ្ញុំ",
     "និងរីករាយជាមួយពេលវេលាដ៏ពិសេសនេះ 🥰",
@@ -97,7 +97,7 @@ export function inviteShareMessage(m: ShareMessageInput): string {
     "",
     `🤵 ${m.groomName}  💞  ${m.brideName} 👰`,
     "",
-    "👇 ចុចទីនេះដើម្បីមើលធៀបការ 👇",
+    "👇 ចុចទីនេះដើម្បីមើលធៀបការ",
     m.url,
   ].join("\n");
 }

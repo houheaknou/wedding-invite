@@ -16,9 +16,9 @@ describe("inviteShareMessage (Telegram invitation text)", () => {
   it("Khmer: greeting, date with weekday, time, place in a ribbon, couple, link last", () => {
     expect(inviteShareMessage({ ...base, lang: "km", guestName: "បង ហូ ហៀកនូ" })).toBe(
       [
-        "💌✨ សំបុត្រអញ្ជើញមង្គលការ ✨💌",
+        "✨ សំបុត្រអញ្ជើញមង្គលការ ✨",
         "",
-        "🌸 ជំរាបសួរ បង ហូ ហៀកនូ 🌸",
+        "🌸 ជំរាបសួរ បង ហូ ហៀកនូ",
         "",
         "💍 យើងខ្ញុំទាំងពីរ សូមគោរពអញ្ជើញបង",
         "មកចូលរួមអបអរសាទរ ពិធីមង្គលការរបស់យើងខ្ញុំ",
@@ -34,7 +34,7 @@ describe("inviteShareMessage (Telegram invitation text)", () => {
         "",
         "🤵 សួរ សក្កដា  💞  ឯម កក្កដា 👰",
         "",
-        "👇 ចុចទីនេះដើម្បីមើលធៀបការ 👇",
+        "👇 ចុចទីនេះដើម្បីមើលធៀបការ",
         "https://example.com/i/abc/g1",
       ].join("\n"),
     );
@@ -42,7 +42,7 @@ describe("inviteShareMessage (Telegram invitation text)", () => {
 
   it("a younger guest (ប្អូន): friendly hello, no គោរព, and ប្អូន throughout", () => {
     const msg = inviteShareMessage({ ...base, lang: "km", guestName: "ដារ៉ា", term: "ប្អូន" });
-    expect(msg).toContain("🌸 សួស្តី ប្អូន ដារ៉ា 🌸");
+    expect(msg).toContain("🌸 សួស្តី ប្អូន ដារ៉ា");
     expect(msg).toContain("💍 យើងខ្ញុំទាំងពីរ សូមអញ្ជើញប្អូន");
     expect(msg).toContain("💕 វត្តមានរបស់ប្អូន គឺជាកិត្តិយស");
     expect(msg).not.toContain("បង");
@@ -50,10 +50,10 @@ describe("inviteShareMessage (Telegram invitation text)", () => {
 
   it("other terms keep the respectful wording; the term isn't doubled when typed in the name", () => {
     const lok = inviteShareMessage({ ...base, lang: "km", guestName: "សុខ ចាន់", term: "លោក" });
-    expect(lok).toContain("🌸 ជំរាបសួរ លោក សុខ ចាន់ 🌸");
+    expect(lok).toContain("🌸 ជំរាបសួរ លោក សុខ ចាន់");
     expect(lok).toContain("សូមគោរពអញ្ជើញលោក");
     const typed = inviteShareMessage({ ...base, lang: "km", guestName: "អ្នកស្រី ស្រីពៅ", term: "អ្នកស្រី" });
-    expect(typed).toContain("🌸 ជំរាបសួរ អ្នកស្រី ស្រីពៅ 🌸");
+    expect(typed).toContain("🌸 ជំរាបសួរ អ្នកស្រី ស្រីពៅ");
   });
 
   it("without a guest: no greeting line, addresses លោកអ្នក; no place line when empty", () => {
@@ -65,10 +65,10 @@ describe("inviteShareMessage (Telegram invitation text)", () => {
 
   it("shows minutes only when there are some, and English uses the English names", () => {
     const msg = inviteShareMessage({ ...base, lang: "en", startsAt: "2025-11-06T10:30:00.000Z", guestName: "Nou" });
-    expect(msg).toContain("🌸 Dear Nou 🌸");
+    expect(msg).toContain("🌸 Dear Nou");
     expect(msg).toContain("⏰ 5:30 PM");
     expect(msg).toContain("🗓️ Thursday, 6 November 2025");
     expect(msg).toContain("🤵 Sour Sakada  💞  Em Kakada 👰");
-    expect(msg.endsWith("👇\nhttps://example.com/i/abc/g1")).toBe(true);
+    expect(msg.endsWith("👇 Tap to open the invitation\nhttps://example.com/i/abc/g1")).toBe(true);
   });
 });
