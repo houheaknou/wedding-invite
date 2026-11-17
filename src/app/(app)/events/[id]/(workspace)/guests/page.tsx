@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { requireOwnedEvent } from "@/features/auth/session";
 import { fmt, getDict } from "@/lib/i18n";
 import { PAGE_SIZES, SIDES, STATUSES } from "@/lib/constants";
-import { deleteGuest, importGuests, patchGuest, quickAddGuest, removeGroup, saveGuestDetails } from "@/features/guests/actions";
+import { deleteGuest, importGuests, patchGuest, quickAddGuest, removeGroup, renameGroup, saveGuestDetails } from "@/features/guests/actions";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { TelegramShareButton } from "@/components/TelegramShareButton";
 import { Dropdown } from "@/components/Dropdown";
@@ -190,6 +190,7 @@ export default async function GuestsPage({
           sideCounts={sideCounts}
           groupCounts={groupCounts}
           removeGroup={removeGroup.bind(null, id)}
+          renameGroup={renameGroup.bind(null, id)}
           t={{
             all: t.all,
             group: t.group,
@@ -197,6 +198,7 @@ export default async function GuestsPage({
             delete: t.delete,
             removeGroup: t.removeGroup,
             removeGroupConfirm: t.removeGroupConfirm,
+            renameGroup: t.renameGroup,
             side_BRIDE: t.side_BRIDE,
             side_GROOM: t.side_GROOM,
             side_BOTH: t.side_BOTH,

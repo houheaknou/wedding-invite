@@ -86,6 +86,19 @@ export async function deleteGuest(eventId: string, guestId: string) {
   revalidatePath(`/events/${eventId}`, "layout");
 }
 
+/**
+ * Renames a group on all its guests. Renaming to a group that already exists merges the two.
+ * Returns the saved name ("" when nothing changed).
+ */
+export async function renameGroup(eventId: string, from: string, to: string): Promise<string> {
+  await requireOwnedEvent(eventId);
+  const name = to.trim().slice(0, 80);
+  if (!from || !name || name === from) return "";
+  await prisma.guest.updateMany({ where: { eventId, group: from }, data: { group: name } });
+  revalidatePath(`/events/${eventId}`, "layout");
+  return name;
+}
+
 /** Removes a group: its guests stay, with no group (they show under "Other"). */
 export async function removeGroup(eventId: string, group: string) {
   await requireOwnedEvent(eventId);
