@@ -57,6 +57,105 @@ function useFlash() {
   return { flash, run };
 }
 
+/* ───────────── pick from existing groups ───────────── */
+
+/**
+ * The groups already used, offered under a group field: all of them when it gets focus, then the
+ * ones matching what is typed. Arrow keys + Enter, or click, to pick; typing a new name still works.
+ */
+function useSuggest(options: string[]) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState(""); // "" = show every group
+  const [hi, setHi] = useState(-1);
+  const q = query.trim().toLowerCase();
+  const list = options.filter((o) => !q || o.toLowerCase().includes(q));
+  return {
+    open: open && list.length > 0,
+    list,
+    hi,
+    showAll: () => {
+      setOpen(true);
+      setQuery("");
+      setHi(-1);
+    },
+    typed: (v: string) => {
+      setOpen(true);
+      setQuery(v);
+      setHi(-1);
+    },
+    close: () => setOpen(false),
+    /** arrow keys move the highlight; returns the group Enter picked, or null */
+    key: (e: React.KeyboardEvent): string | null => {
+      if (!open || list.length === 0) return null;
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        const step = e.key === "ArrowDown" ? 1 : -1;
+        setHi((h) => (h + step + list.length) % list.length);
+      }
+      if (e.key === "Enter" && hi >= 0) return list[hi];
+      return null;
+    },
+  };
+}
+
+function SuggestList({
+  anchor,
+  s,
+  current,
+  onPick,
+}: {
+  anchor: HTMLInputElement | null;
+  s: ReturnType<typeof useSuggest>;
+  current: string;
+  onPick: (group: string) => void;
+}) {
+  const { open, close } = s;
+  // pinned to the screen (the table scrolls sideways and would clip it): close when the page moves
+  useEffect(() => {
+    if (!open) return;
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    return () => {
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+    };
+  }, [open, close]);
+  if (!open || !anchor) return null;
+  const r = anchor.getBoundingClientRect();
+  const width = Math.max(r.width, 180);
+  const below = r.bottom + 230 < window.innerHeight;
+  return (
+    <div
+      role="listbox"
+      style={{
+        left: Math.min(r.left, window.innerWidth - width - 8),
+        width,
+        ...(below ? { top: r.bottom + 4 } : { bottom: window.innerHeight - r.top + 4 }),
+      }}
+      className="fixed z-50 max-h-56 overflow-y-auto rounded-xl border border-stone-200 bg-white p-1 text-sm shadow-xl"
+    >
+      {s.list.map((o, i) => (
+        <div
+          key={o}
+          role="option"
+          aria-selected={o === current}
+          // mousedown, not click: keep the focus in the field so it saves on its own blur
+          onMouseDown={(e) => {
+            e.preventDefault();
+            onPick(o);
+          }}
+          className={`flex cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 ${
+            i === s.hi ? "bg-brand-50 text-brand-700" : "text-stone-700 hover:bg-stone-50"
+          } ${o === current ? "font-semibold" : ""}`}
+        >
+          <span className="truncate">{o}</span>
+          {o === current && <span className="text-xs text-brand-600">✓</span>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /** A text/number cell: saves when you leave it (or press Enter); Esc puts the old value back. */
 function TextCell({
   value,
@@ -68,6 +167,7 @@ function TextCell({
   inputMode,
   required = false,
   className = "",
+  options,
 }: {
   value: string;
   field: keyof GuestPatch;
@@ -78,10 +178,13 @@ function TextCell({
   inputMode?: "numeric" | "tel" | "text";
   required?: boolean;
   className?: string;
+  /** values to pick from (the event's groups) */
+  options?: string[];
 }) {
   const committed = useRef(value);
   const inputRef = useRef<HTMLInputElement>(null);
   const { flash, run } = useFlash();
+  const suggest = useSuggest(options ?? []);
   // Saved elsewhere (the edit popup): show the new value, unless the cell is being typed in
   useEffect(() => {
     const el = inputRef.current;
@@ -100,25 +203,44 @@ function TextCell({
     if (await run(() => save(patch))) committed.current = v;
     else el.value = committed.current;
   };
+  const pick = (v: string) => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.value = v;
+    el.blur(); // saves through onBlur
+  };
   return (
-    <input
-      ref={inputRef}
-      type={type}
-      inputMode={inputMode}
-      min={type === "number" ? 1 : undefined}
-      defaultValue={value}
-      aria-label={label}
-      placeholder={placeholder}
-      className={`${cellBase} ${flashCls[flash]} ${className}`}
-      onBlur={(e) => void commit(e.currentTarget)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") e.currentTarget.blur();
-        if (e.key === "Escape") {
-          e.currentTarget.value = committed.current;
-          e.currentTarget.blur();
-        }
-      }}
-    />
+    <>
+      <input
+        ref={inputRef}
+        type={type}
+        inputMode={inputMode}
+        min={type === "number" ? 1 : undefined}
+        defaultValue={value}
+        aria-label={label}
+        placeholder={placeholder}
+        autoComplete={options ? "off" : undefined}
+        className={`${cellBase} ${flashCls[flash]} ${className}`}
+        onFocus={options ? suggest.showAll : undefined}
+        onInput={options ? (e) => suggest.typed(e.currentTarget.value) : undefined}
+        onBlur={(e) => {
+          suggest.close();
+          void commit(e.currentTarget);
+        }}
+        onKeyDown={(e) => {
+          const picked = suggest.key(e);
+          if (picked !== null) return pick(picked);
+          if (e.key === "Enter") e.currentTarget.blur();
+          if (e.key === "Escape") {
+            e.currentTarget.value = committed.current;
+            e.currentTarget.blur();
+          }
+        }}
+      />
+      {options && (
+        <SuggestList anchor={inputRef.current} s={suggest} current={inputRef.current?.value.trim() ?? value} onPick={pick} />
+      )}
+    </>
   );
 }
 
@@ -190,6 +312,8 @@ export function GuestQuickAdd({
   const nameRef = useRef<HTMLInputElement>(null);
   const [side, setSide] = useState<GuestSide>(defaultSide ?? "BOTH");
   const [group, setGroup] = useState(defaultGroup);
+  const groupRef = useRef<HTMLInputElement>(null);
+  const groupSuggest = useSuggest(groups);
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useTransition();
   const field =
@@ -252,19 +376,36 @@ export function GuestQuickAdd({
           ))}
         </select>
         <input
+          ref={groupRef}
           value={group}
-          onChange={(e) => setGroup(e.target.value)}
-          list="guest-groups"
+          onChange={(e) => {
+            setGroup(e.target.value);
+            groupSuggest.typed(e.target.value);
+          }}
+          onFocus={groupSuggest.showAll}
+          onBlur={groupSuggest.close}
+          onKeyDown={(e) => {
+            const picked = groupSuggest.key(e);
+            if (picked !== null) {
+              e.preventDefault(); // pick the group, don't add the guest yet
+              setGroup(picked);
+              groupSuggest.close();
+            }
+          }}
           autoComplete="off"
           placeholder={t.group}
           aria-label={t.group}
           className={field}
         />
-        <datalist id="guest-groups">
-          {groups.map((g) => (
-            <option key={g} value={g} />
-          ))}
-        </datalist>
+        <SuggestList
+          anchor={groupRef.current}
+          s={groupSuggest}
+          current={group.trim()}
+          onPick={(g) => {
+            setGroup(g);
+            groupSuggest.close();
+          }}
+        />
         <input name="invitedCount" type="number" inputMode="numeric" min={1} defaultValue={1} aria-label={t.invitedCount} title={t.invitedCount} className={field} />
         <button
           type="submit"
@@ -321,12 +462,15 @@ export function GuestSheetRow({
   t,
   edit,
   actions,
+  groups,
 }: {
   g: SheetGuest;
   save: (id: string, patch: GuestPatch) => Promise<SheetResult>;
   t: GuestSheetDict;
   edit: ReactNode;
   actions: ReactNode;
+  /** the event's groups, offered when editing a group cell */
+  groups: string[];
 }) {
   const { saveField, pick } = useRowSave(save, g.id);
   return (
@@ -344,7 +488,7 @@ export function GuestSheetRow({
         <ChipSelect value={g.side} options={SIDES} labels={(s) => t[`side_${s}`]} chip={SIDE_CHIP} label={t.side} onPick={(side) => pick({ side })} />
       </td>
       <td className="px-1 py-1.5">
-        <TextCell value={g.group ?? ""} field="group" save={saveField} label={t.group} placeholder="—" className="text-stone-600" />
+        <TextCell value={g.group ?? ""} field="group" save={saveField} label={t.group} placeholder="—" className="text-stone-600" options={groups} />
       </td>
       <td className="w-20 px-1 py-1.5">
         <TextCell value={String(g.invitedCount)} field="invitedCount" save={saveField} label={t.invitedCount} type="number" inputMode="numeric" className="text-right font-medium" />
@@ -368,12 +512,15 @@ export function GuestSheetCard({
   t,
   edit,
   actions,
+  groups,
 }: {
   g: SheetGuest;
   save: (id: string, patch: GuestPatch) => Promise<SheetResult>;
   t: GuestSheetDict;
   edit: ReactNode;
   actions: ReactNode;
+  /** the event's groups, offered when editing a group cell */
+  groups: string[];
 }) {
   const { saveField, pick } = useRowSave(save, g.id);
   return (
@@ -390,7 +537,7 @@ export function GuestSheetCard({
           <TextCell value={String(g.invitedCount)} field="invitedCount" save={saveField} label={t.invitedCount} type="number" inputMode="numeric" className="text-right" />
         </div>
       </div>
-      <TextCell value={g.group ?? ""} field="group" save={saveField} label={t.group} placeholder={t.group} className="text-stone-600" />
+      <TextCell value={g.group ?? ""} field="group" save={saveField} label={t.group} placeholder={t.group} className="text-stone-600" options={groups} />
       <div className="flex flex-wrap items-center gap-1.5">
         <ChipSelect value={g.side} options={SIDES} labels={(s) => t[`side_${s}`]} chip={SIDE_CHIP} label={t.side} onPick={(side) => pick({ side })} />
         <ChipSelect value={g.status} options={STATUSES} labels={(s) => t[`status_${s}`]} chip={STATUS_CHIP} label={t.status} onPick={(status) => pick({ status })} />

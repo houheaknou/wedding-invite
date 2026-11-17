@@ -86,6 +86,14 @@ export async function deleteGuest(eventId: string, guestId: string) {
   revalidatePath(`/events/${eventId}`, "layout");
 }
 
+/** Removes a group: its guests stay, with no group (they show under "Other"). */
+export async function removeGroup(eventId: string, group: string) {
+  await requireOwnedEvent(eventId);
+  if (!group) return;
+  await prisma.guest.updateMany({ where: { eventId, group }, data: { group: null } });
+  revalidatePath(`/events/${eventId}`, "layout");
+}
+
 export async function importGuests(eventId: string, _: ImportState, fd: FormData): Promise<ImportState> {
   await requireOwnedEvent(eventId);
   const { t } = await getDict();

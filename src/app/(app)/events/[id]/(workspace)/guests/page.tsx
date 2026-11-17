@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { requireOwnedEvent } from "@/features/auth/session";
 import { fmt, getDict } from "@/lib/i18n";
 import { PAGE_SIZES, SIDES, STATUSES } from "@/lib/constants";
-import { deleteGuest, importGuests, patchGuest, quickAddGuest, saveGuestDetails } from "@/features/guests/actions";
+import { deleteGuest, importGuests, patchGuest, quickAddGuest, removeGroup, saveGuestDetails } from "@/features/guests/actions";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { TelegramShareButton } from "@/components/TelegramShareButton";
 import { Dropdown } from "@/components/Dropdown";
@@ -189,7 +189,18 @@ export default async function GuestsPage({
           group={group}
           sideCounts={sideCounts}
           groupCounts={groupCounts}
-          t={{ all: t.all, group: t.group, noGroup: t.noGroup, side_BRIDE: t.side_BRIDE, side_GROOM: t.side_GROOM, side_BOTH: t.side_BOTH }}
+          removeGroup={removeGroup.bind(null, id)}
+          t={{
+            all: t.all,
+            group: t.group,
+            noGroup: t.noGroup,
+            delete: t.delete,
+            removeGroup: t.removeGroup,
+            removeGroupConfirm: t.removeGroupConfirm,
+            side_BRIDE: t.side_BRIDE,
+            side_GROOM: t.side_GROOM,
+            side_BOTH: t.side_BOTH,
+          }}
         />
 
         {/* Toolbar */}
@@ -264,7 +275,7 @@ export default async function GuestsPage({
                 </thead>
                 <tbody className="divide-y divide-stone-100">
                   {guests.map((g) => (
-                    <GuestSheetRow key={g.id} g={sheetGuest(g)} save={save} t={sheetT} edit={editPopup(g)} actions={rowActions(g.id, g.name)} />
+                    <GuestSheetRow key={g.id} g={sheetGuest(g)} save={save} t={sheetT} edit={editPopup(g)} actions={rowActions(g.id, g.name)} groups={groupNames} />
                   ))}
                 </tbody>
               </table>
@@ -273,7 +284,7 @@ export default async function GuestsPage({
             {/* Mobile cards */}
             <ul className="space-y-2 md:hidden">
               {guests.map((g) => (
-                <GuestSheetCard key={g.id} g={sheetGuest(g)} save={save} t={sheetT} edit={editPopup(g)} actions={rowActions(g.id, g.name)} />
+                <GuestSheetCard key={g.id} g={sheetGuest(g)} save={save} t={sheetT} edit={editPopup(g)} actions={rowActions(g.id, g.name)} groups={groupNames} />
               ))}
             </ul>
           </>
