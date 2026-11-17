@@ -1006,15 +1006,15 @@ export function LotusInvitation({
                       <span className={s.icCircle}>
                         <Icon name="phone" />
                       </span>
-                      <div>
-                        <p className={s.infoL}>{t.phoneL}</p>
-                        <p className={s.infoV}>
-                          {phones.map(({ label, tel }) => (
-                            <a key={tel} href={`tel:${tel}`} style={{ display: "block" }}>
-                              {label}
-                            </a>
-                          ))}
-                        </p>
+                      <p className={s.infoL} style={{ alignSelf: "center" }}>
+                        {t.phoneL}
+                      </p>
+                      <div className={s.phones}>
+                        {phones.map(({ label, tel }) => (
+                          <a key={tel} href={`tel:${tel}`}>
+                            {label}
+                          </a>
+                        ))}
                       </div>
                     </div>
                   )}

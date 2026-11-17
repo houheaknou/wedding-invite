@@ -81,8 +81,9 @@
 .btn:hover, .btnOutline:hover { transform: translateY(-1px); }
 .btn:disabled { opacity: 0.7; cursor: default; }
 .contactsTitle { margin-top: 20px !important; font: 400 17.5px/1.9 var(--km-display); color: var(--olive); }
-.phones { display: grid; gap: 4px; margin-top: 6px; }
-.phones a { font: 700 18.5px var(--km-body); color: var(--olive-dark); text-decoration: none; letter-spacing: 0.03em; }
+.phones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: min(100%, 320px); margin: 8px auto 0; }
+.phones a:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.phones a { display: flex; align-items: center; justify-content: center; padding: 9px 6px; border-radius: 12px; font: 700 16px var(--km-body); letter-spacing: 0.02em; font-variant-numeric: lining-nums tabular-nums; white-space: nowrap; color: var(--olive-dark); text-decoration: none; background: rgba(255, 255, 240, 0.7); border: 1px solid color-mix(in srgb, var(--olive) 55%, transparent); }
 .signature { margin-top: 10px !important; font: 400 30px/1.6 var(--km-display); color: var(--olive); }
 .signature span { font-size: 19.5px; margin: 0 4px; vertical-align: middle; }
 
