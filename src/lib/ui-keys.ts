@@ -77,6 +77,8 @@ export type EventFormDict = Pick<Dict, (typeof EVENT_FORM_KEYS)[number]>;
 
 export const GUEST_SHEET_KEYS = keys(
   "addGuest",
+  "delete",
+  "clickAgainToDelete",
   "quickAddHint",
   "guestAdded",
   "add",

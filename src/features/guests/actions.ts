@@ -64,6 +64,22 @@ export async function updateGuest(
   redirect(`/events/${eventId}/guests`);
 }
 
+/** Same as updateGuest, for the edit popup on the guests list: stays on the page (the popup closes). */
+export async function saveGuestDetails(
+  eventId: string,
+  guestId: string,
+  _: FormState,
+  fd: FormData,
+): Promise<FormState> {
+  await requireOwnedGuest(eventId, guestId);
+  const { t } = await getDict();
+  const data = readGuest(fd);
+  if (!data) return { error: t.errRequired };
+  await prisma.guest.update({ where: { id: guestId }, data });
+  revalidatePath(`/events/${eventId}`, "layout");
+  return {};
+}
+
 export async function deleteGuest(eventId: string, guestId: string) {
   await requireOwnedGuest(eventId, guestId);
   await prisma.guest.delete({ where: { id: guestId } });

@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, useState, useTransition, type ReactNode } from "react";
-import Link from "next/link";
-import { Loader2, Pencil, Plus, Users } from "lucide-react";
+import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
+import { Loader2, Plus, Trash2, Users } from "lucide-react";
 import type { GuestSide, GuestStatus } from "@prisma/client";
 import type { GuestPatch, SheetResult } from "@/features/guests/actions";
 import { SIDE_CHIP, SIDES, STATUS_CHIP, STATUSES } from "@/lib/constants";
@@ -12,7 +11,7 @@ import type { GuestSheetDict } from "@/lib/ui-keys";
 /**
  * Spreadsheet-style guest list: a quick-add row (type, Enter, next guest) and rows whose cells are
  * edited in place and saved on their own — no form to open for the everyday changes. The full form
- * (notes) is still one click away on the pencil.
+ * (notes) opens in a popup from the pencil.
  */
 
 export type SheetGuest = {
@@ -81,7 +80,15 @@ function TextCell({
   className?: string;
 }) {
   const committed = useRef(value);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { flash, run } = useFlash();
+  // Saved elsewhere (the edit popup): show the new value, unless the cell is being typed in
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el || el === document.activeElement || value === committed.current) return;
+    committed.current = value;
+    el.value = value;
+  }, [value]);
   const commit = async (el: HTMLInputElement) => {
     const v = el.value.trim();
     if (v === committed.current) return;
@@ -95,6 +102,7 @@ function TextCell({
   };
   return (
     <input
+      ref={inputRef}
       type={type}
       inputMode={inputMode}
       min={type === "number" ? 1 : undefined}
@@ -132,6 +140,7 @@ function ChipSelect<T extends string>({
 }) {
   const [current, setCurrent] = useState(value);
   const [busy, setBusy] = useState(false);
+  useEffect(() => setCurrent(value), [value]); // saved elsewhere (the edit popup)
   return (
     <select
       aria-label={label}
@@ -267,19 +276,52 @@ export function GuestQuickAdd({
   );
 }
 
+/* ───────────── delete ───────────── */
+
+/**
+ * Delete without a browser dialog: the first click turns the bin into a red "Delete?" button, a
+ * second click deletes. Left alone for a few seconds, it goes back to the bin.
+ */
+export function DeleteGuestButton({ remove, t }: { remove: () => Promise<void>; t: GuestSheetDict }) {
+  const [armed, setArmed] = useState(false);
+  const [pending, start] = useTransition();
+  useEffect(() => {
+    if (!armed) return;
+    const timer = setTimeout(() => setArmed(false), 4000);
+    return () => clearTimeout(timer);
+  }, [armed]);
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      title={armed ? t.clickAgainToDelete : t.delete}
+      aria-label={armed ? t.clickAgainToDelete : t.delete}
+      onClick={() => (armed ? start(() => remove()) : setArmed(true))}
+      className={
+        armed || pending
+          ? "inline-flex h-8 items-center gap-1 rounded-full bg-red-600 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-70"
+          : "inline-flex size-8 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+      }
+    >
+      {pending ? <Loader2 className="size-3.5 animate-spin" /> : <Trash2 className="size-3.5" />}
+      {(armed || pending) && <span>{t.delete}?</span>}
+    </button>
+  );
+}
+
 /* ───────────── editable rows ───────────── */
 
 export function GuestSheetRow({
   g,
   save,
   t,
-  editHref,
+  edit,
   actions,
 }: {
   g: SheetGuest;
   save: (id: string, patch: GuestPatch) => Promise<SheetResult>;
   t: GuestSheetDict;
-  editHref: string;
+  edit: ReactNode;
   actions: ReactNode;
 }) {
   const { saveField, pick } = useRowSave(save, g.id);
@@ -309,9 +351,7 @@ export function GuestSheetRow({
       <td className="py-1.5 pl-1 pr-3">
         <div className="flex items-center justify-end gap-1.5">
           {actions}
-          <Link href={editHref} className="inline-flex size-8 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700" title={t.edit} aria-label={t.edit}>
-            <Pencil className="size-3.5" />
-          </Link>
+          {edit}
         </div>
       </td>
     </tr>
@@ -322,13 +362,13 @@ export function GuestSheetCard({
   g,
   save,
   t,
-  editHref,
+  edit,
   actions,
 }: {
   g: SheetGuest;
   save: (id: string, patch: GuestPatch) => Promise<SheetResult>;
   t: GuestSheetDict;
-  editHref: string;
+  edit: ReactNode;
   actions: ReactNode;
 }) {
   const { saveField, pick } = useRowSave(save, g.id);
@@ -337,9 +377,7 @@ export function GuestSheetCard({
       <div className="flex items-center gap-2">
         <Avatar name={g.name} className="size-9 shrink-0 text-sm" />
         <TextCell value={g.name} field="name" save={saveField} label={t.name} required className="font-medium text-stone-800" />
-        <Link href={editHref} className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-stone-200 text-stone-600" title={t.edit} aria-label={t.edit}>
-          <Pencil className="size-3.5" />
-        </Link>
+        <div className="shrink-0">{edit}</div>
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)_4.5rem] gap-2">
         <TextCell value={g.phone ?? ""} field="phone" save={saveField} label={t.phone} placeholder={t.phone} type="tel" inputMode="tel" className="text-stone-600" />

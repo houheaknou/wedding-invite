@@ -1,22 +1,22 @@
 import Link from "next/link";
 import type { GuestSide, GuestStatus, Prisma } from "@prisma/client";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, Send, Trash2, Upload, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, Pencil, Send, Upload, Users } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireOwnedEvent } from "@/features/auth/session";
 import { fmt, getDict } from "@/lib/i18n";
 import { PAGE_SIZES, SIDES, STATUSES } from "@/lib/constants";
-import { deleteGuest, importGuests, patchGuest, quickAddGuest } from "@/features/guests/actions";
-import { ConfirmButton } from "@/components/ConfirmButton";
+import { deleteGuest, importGuests, patchGuest, quickAddGuest, saveGuestDetails } from "@/features/guests/actions";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { TelegramShareButton } from "@/components/TelegramShareButton";
 import { Dropdown } from "@/components/Dropdown";
 import { GuestFilters } from "@/features/guests/GuestFilters";
-import { GuestQuickAdd, GuestSheetCard, GuestSheetRow } from "@/features/guests/GuestSheet";
+import { GuestForm } from "@/features/guests/GuestForm";
+import { DeleteGuestButton, GuestQuickAdd, GuestSheetCard, GuestSheetRow } from "@/features/guests/GuestSheet";
 import { ImportForm } from "@/components/ImportForm";
 import { Modal } from "@/components/Modal";
 import { PageSizeSelect } from "@/components/PageSizeSelect";
 import { btnIcon, btnSecondary, card } from "@/components/ui";
-import { pick, GUEST_SHEET_KEYS, IMPORT_FORM_KEYS } from "@/lib/ui-keys";
+import { pick, GUEST_FORM_KEYS, GUEST_SHEET_KEYS, IMPORT_FORM_KEYS } from "@/lib/ui-keys";
 
 type SearchParams = { q?: string; group?: string; side?: string; status?: string; page?: string; size?: string };
 
@@ -104,8 +104,23 @@ export default async function GuestsPage({
     status: g.status,
     notes: g.notes,
   });
+  const formT = pick(t, GUEST_FORM_KEYS);
+  // The pencil opens the full form (with notes) in a popup; the form is built on each open, so it
+  // shows edits made in the list since the last time
+  const editPopup = (g: (typeof guests)[number]) => (
+    <Modal
+      key="edit"
+      title={t.editGuest}
+      closeLabel={t.close}
+      resetOnClose
+      triggerClassName="inline-flex size-8 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700"
+      trigger={<Pencil className="size-3.5" aria-label={t.edit} />}
+    >
+      <GuestForm action={saveGuestDetails.bind(null, id, g.id)} t={formT} guest={g} />
+    </Modal>
+  );
   const rowActions = (guestId: string, guestName: string) => (
-    <div className="flex justify-end gap-1.5">
+    <div key="actions" className="flex justify-end gap-1.5">
       {invitation?.published && (
         <>
           <TelegramShareButton
@@ -117,13 +132,7 @@ export default async function GuestsPage({
           <CopyLinkButton path={`/i/${invitation.shareId}/${guestId}`} label={t.copyInviteLink} />
         </>
       )}
-      <ConfirmButton
-        action={deleteGuest.bind(null, id, guestId)}
-        confirm={t.confirmDelete}
-        className={`${btnIcon} hover:text-red-600`}
-      >
-        <Trash2 className="size-3.5" aria-label={t.delete} />
-      </ConfirmButton>
+      <DeleteGuestButton remove={deleteGuest.bind(null, id, guestId)} t={sheetT} />
     </div>
   );
 
@@ -214,7 +223,7 @@ export default async function GuestsPage({
                 </thead>
                 <tbody className="divide-y divide-stone-100">
                   {guests.map((g) => (
-                    <GuestSheetRow key={g.id} g={sheetGuest(g)} save={save} t={sheetT} editHref={`/events/${id}/guests/${g.id}/edit`} actions={rowActions(g.id, g.name)} />
+                    <GuestSheetRow key={g.id} g={sheetGuest(g)} save={save} t={sheetT} edit={editPopup(g)} actions={rowActions(g.id, g.name)} />
                   ))}
                 </tbody>
               </table>
@@ -223,7 +232,7 @@ export default async function GuestsPage({
             {/* Mobile cards */}
             <ul className="space-y-2 md:hidden">
               {guests.map((g) => (
-                <GuestSheetCard key={g.id} g={sheetGuest(g)} save={save} t={sheetT} editHref={`/events/${id}/guests/${g.id}/edit`} actions={rowActions(g.id, g.name)} />
+                <GuestSheetCard key={g.id} g={sheetGuest(g)} save={save} t={sheetT} edit={editPopup(g)} actions={rowActions(g.id, g.name)} />
               ))}
             </ul>
           </>

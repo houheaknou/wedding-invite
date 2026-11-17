@@ -26,10 +26,11 @@ export function GuestForm({
   const formRef = useRef<HTMLFormElement>(null);
   const closeModal = useCloseModal();
 
-  // Adding (inside the modal): clear the form and close after each successful save
+  // Inside a modal: close after each successful save (and clear the form when adding).
+  // On the full edit page the action redirects instead, and closeModal does nothing.
   useEffect(() => {
-    if (!guest && state && !state.error) {
-      formRef.current?.reset();
+    if (state && !state.error) {
+      if (!guest) formRef.current?.reset();
       closeModal();
     }
   }, [state, guest, closeModal]);

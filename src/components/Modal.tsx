@@ -12,12 +12,15 @@ export function Modal({
   triggerClassName,
   title,
   closeLabel,
+  resetOnClose = false,
   children,
 }: {
   trigger: ReactNode;
   triggerClassName: string;
   title: string;
   closeLabel: string;
+  /** Throw the content away on close, so the next open starts from the current data (edit forms) */
+  resetOnClose?: boolean;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -36,6 +39,9 @@ export function Modal({
       </button>
       <dialog
         ref={ref}
+        onClose={() => {
+          if (resetOnClose) setOpened(false);
+        }}
         onClick={(e) => {
           if (e.target === ref.current) close(); // backdrop click
         }}
