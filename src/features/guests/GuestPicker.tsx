@@ -110,7 +110,7 @@ export function GuestPicker({
       {/* chosen guest: their initials inside the field */}
       {exact && (
         <span className="pointer-events-none absolute left-1.5 top-[21px] -translate-y-1/2">
-          <Avatar name={exact.name} className="size-7 text-[10px]" />
+          <Avatar name={exact.name} className="size-7 text-xs" />
         </span>
       )}
       <span className="absolute right-1.5 top-[21px] flex -translate-y-1/2 items-center">
@@ -188,7 +188,7 @@ export function GuestPicker({
                   onClick={() => pick(g)}
                   className={`flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 text-left transition ${i === active ? "bg-brand-50" : ""} ${g.id === exact?.id ? "ring-1 ring-brand-200" : ""}`}
                 >
-                  <Avatar name={g.name} className="size-8 text-[11px]" />
+                  <Avatar name={g.name} className="size-8 text-xs" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium text-stone-800">{g.name}</span>
                     <span className="flex items-center gap-1.5 text-xs text-stone-500">

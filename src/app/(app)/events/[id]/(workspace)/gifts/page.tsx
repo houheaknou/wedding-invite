@@ -195,7 +195,7 @@ export default async function GiftsPage({ params, searchParams }: { params: Prom
                             {g.guestId && <UserCheck className="size-3.5 shrink-0 text-emerald-500" aria-label={t.giftOnGuestList} />}
                           </span>
                           <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-stone-500">
-                            {g.side !== "BOTH" && <span className={`${chip} px-1.5 py-0 text-[10px] ${SIDE_CHIP[g.side]}`}>{t[`side_${g.side}`]}</span>}
+                            {g.side !== "BOTH" && <span className={`${chip} px-1.5 py-0 text-xs ${SIDE_CHIP[g.side]}`}>{t[`side_${g.side}`]}</span>}
                             <span>
                               {METHOD_ICON[g.method]} {t[`method_${g.method}`]}
                             </span>

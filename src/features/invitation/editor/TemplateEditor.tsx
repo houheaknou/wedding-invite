@@ -748,7 +748,7 @@ export function TemplateEditor({
                     key={tpl.id}
                     type="button"
                     onClick={() => pickTemplate(tpl.id)}
-                    className={`rounded-lg border p-1.5 text-[11px] transition ${
+                    className={`rounded-lg border p-1.5 text-xs transition ${
                       s.template === tpl.id ? "border-amber-500 ring-2 ring-amber-200" : "border-stone-200 hover:border-amber-200"
                     }`}
                   >

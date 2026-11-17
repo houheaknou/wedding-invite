@@ -274,7 +274,7 @@ export default async function ExpensesPage({
               <span className={`inline-flex size-8 items-center justify-center rounded-full ${tone}`}>
                 <Icon className="size-4" />
               </span>
-              <p className="mt-2 text-[11px] text-stone-500 sm:text-xs">{label}</p>
+              <p className="mt-2 text-xs text-stone-500 sm:text-xs">{label}</p>
               <p className="truncate text-sm font-bold text-stone-800 sm:text-lg">{value}</p>
             </div>
           ))}
@@ -393,7 +393,7 @@ export default async function ExpensesPage({
                       />
                     </Modal>
                   </div>
-                  <div className={`hidden ${cols} gap-x-2 border-y border-stone-100 bg-stone-50/70 py-1.5 pl-9 pr-2 text-[11px] font-medium text-stone-500 sm:grid`}>
+                  <div className={`hidden ${cols} gap-x-2 border-y border-stone-100 bg-stone-50/70 py-1.5 pl-9 pr-2 text-xs font-medium text-stone-500 sm:grid`}>
                     <span>No</span>
                     <span>{t.expenseTitle}</span>
                     <span className="text-right">{t.expenseQuantity}</span>

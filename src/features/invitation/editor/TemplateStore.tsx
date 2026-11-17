@@ -57,17 +57,17 @@ export function TemplateStore({
                     <InvitationView data={{ ...preview, showMap: false }} heroClassName="min-h-[500px]" idPrefix={`s-${tpl.id}-`} thumbnail />
                   </div>
                 </DeferredThumbnail>
-                <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium text-brand-700 shadow-sm">
+                <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-xs font-medium text-brand-700 shadow-sm">
                   Wedding
                 </span>
-                <span className="absolute right-2 top-2 rounded-full bg-emerald-600 px-2 py-0.5 text-[11px] font-semibold text-white shadow-sm">
+                <span className="absolute right-2 top-2 rounded-full bg-emerald-600 px-2 py-0.5 text-xs font-semibold text-white shadow-sm">
                   {t.storeFree}
                 </span>
               </div>
 
               <div className="flex flex-1 flex-col gap-2 p-3">
                 <p className="font-semibold text-stone-800">{tpl.name[lang]}</p>
-                <span className="inline-flex w-fit items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] text-emerald-700 ring-1 ring-emerald-200">
+                <span className="inline-flex w-fit items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700 ring-1 ring-emerald-200">
                   <Users className="size-3" />
                   {t.storeGuests}
                 </span>

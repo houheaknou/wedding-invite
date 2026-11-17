@@ -46,7 +46,7 @@ export function WorkspaceTabs({ eventId, labels }: { eventId: string; labels: Ta
                   if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0 || slug === current) return;
                   setPending({ slug, from: pathname });
                 }}
-                className={`relative flex min-w-16 flex-col items-center gap-0.5 rounded-xl px-3 py-2 text-[11px] whitespace-nowrap transition sm:min-w-20 sm:text-xs ${
+                className={`relative flex min-w-16 flex-col items-center gap-0.5 rounded-xl px-3 py-2 text-xs whitespace-nowrap transition sm:min-w-20 sm:text-xs ${
                   isActive
                     ? "bg-white font-semibold text-brand-600 shadow-sm"
                     : "text-stone-500 hover:bg-white/60 hover:text-stone-800"

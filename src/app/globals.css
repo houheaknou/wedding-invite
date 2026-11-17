@@ -11,6 +11,18 @@
 
 /* Brand palette: warm ivory background, gold primary (matches the gold monogram logo).
    600 is the main text/button colour — dark enough for white button text (≈4.7:1). */
+/* Text sizes one step larger than Tailwind's defaults: Khmer script reads smaller than Latin at the
+   same size, and much of the app used 11-14px. Taller line heights leave room for Khmer's marks above
+   and below the line. (The invitation templates have their own CSS and are not affected.) */
+@theme {
+  --text-xs: 0.875rem; /* 14px (was 12) */
+  --text-xs--line-height: 1.55;
+  --text-sm: 1rem; /* 16px (was 14) */
+  --text-sm--line-height: 1.6;
+  --text-base: 1.0625rem; /* 17px (was 16) */
+  --text-base--line-height: 1.65;
+}
+
 @theme {
   --color-blush: #fbf6ec;
   --color-brand-50: #fdf8ec;
