@@ -2,26 +2,28 @@
 
 import { publicUrl } from "@/lib/public-url";
 import { TelegramIcon } from "@/components/TelegramIcon";
+import { inviteShareMessage, type ShareMessageInput } from "@/features/invitation/share-message";
 
-/** Opens Telegram's share sheet with an invitation link (app-relative path) and a message. */
+/**
+ * Opens Telegram's share sheet with an invitation link (app-relative path) and the invitation
+ * message (date, time, place, couple) with the link at the bottom.
+ */
 export function TelegramShareButton({
   path,
-  text,
+  message,
   label,
   compact = false,
 }: {
   path: string;
-  text: string;
+  message: Omit<ShareMessageInput, "url">;
   label: string;
   compact?: boolean;
 }) {
   function share() {
-    const url = publicUrl(path);
-    window.open(
-      `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
+    const text = inviteShareMessage({ ...message, url: publicUrl(path) });
+    // The whole message goes in `url` (no `text`): Telegram would otherwise put the link on top.
+    // It still finds the link inside and shows the invitation's preview card.
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
   }
   const icon = <TelegramIcon size={compact ? 14 : 16} />;
   if (compact) {

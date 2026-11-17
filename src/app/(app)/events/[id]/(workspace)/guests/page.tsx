@@ -62,7 +62,7 @@ export default async function GuestsPage({
       select: { group: true },
       orderBy: { group: "asc" },
     }),
-    prisma.invitation.findUnique({ where: { eventId: id }, select: { shareId: true, published: true } }),
+    prisma.invitation.findUnique({ where: { eventId: id }, select: { shareId: true, published: true, lang: true } }),
   ]);
   const pages = Math.max(1, Math.ceil(matching / size));
   const page = Math.min(Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1), pages);
@@ -90,7 +90,18 @@ export default async function GuestsPage({
     ...Object.fromEntries(STATUSES.map((s) => [`status_${s}`, t[`status_${s}`]])),
   } as Parameters<typeof GuestFilters>[0]["labels"];
 
-  const couple = `${event.groomName} & ${event.brideName}`;
+  // Telegram message details (the invitation's language; the guest's name is added per row)
+  const shareEvent = {
+    lang: invitation?.lang === "en" ? ("en" as const) : ("km" as const),
+    groomName: event.groomName,
+    brideName: event.brideName,
+    groomNameEn: event.groomNameEn,
+    brideNameEn: event.brideNameEn,
+    startsAt: event.startsAt.toISOString(),
+    venue: event.venue,
+    venueEn: event.venueEn,
+    address: event.address,
+  };
   const sheetT = pick(t, GUEST_SHEET_KEYS);
   const groupNames = groupRows.map((g) => g.group!).filter(Boolean);
   const save = patchGuest.bind(null, id);
@@ -127,7 +138,7 @@ export default async function GuestsPage({
             compact
             path={`/i/${invitation.shareId}/${guestId}`}
             label={t.shareTelegram}
-            text={fmt(t.tgGuestText, { name: guestName, couple })}
+            message={{ ...shareEvent, guestName }}
           />
           <CopyLinkButton path={`/i/${invitation.shareId}/${guestId}`} label={t.copyInviteLink} />
         </>

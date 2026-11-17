@@ -322,7 +322,6 @@ export const TEMPLATE_EDITOR_KEYS = keys(
   "showCountdown",
   "showTitle",
   "templates",
-  "tgInviteText",
   "uploadMusic",
   "uploadOwnImage",
 );

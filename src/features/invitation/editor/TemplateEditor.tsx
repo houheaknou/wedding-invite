@@ -1036,7 +1036,17 @@ export function TemplateEditor({
               <TelegramShareButton
                 path={`/i/${shareId}`}
                 label={t.shareTelegram}
-                text={t.tgInviteText.replace("{couple}", `${s.groomName} & ${s.brideName}`)}
+                message={{
+                  lang: preview.lang,
+                  groomName: preview.groomName,
+                  brideName: preview.brideName,
+                  groomNameEn: preview.groomNameEn,
+                  brideNameEn: preview.brideNameEn,
+                  startsAt: preview.startsAt,
+                  venue: preview.venue,
+                  venueEn: preview.venueEn,
+                  address: preview.address,
+                }}
               />
             </div>
           )}
