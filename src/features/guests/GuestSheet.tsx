@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Pencil, Plus, Trash2, Users } from "lucide-react";
 import type { GuestSide, GuestStatus } from "@prisma/client";
 import type { GuestPatch, SheetResult } from "@/features/guests/actions";
@@ -124,6 +125,19 @@ function SuggestList({
   labels?: GroupToolLabels;
 }) {
   const { open, close } = s;
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  // The group's tab was open: follow a renamed group to its new name, go back to "all" after a delete
+  function followTab(from: string, to: string) {
+    if (params.get("group") !== from) return;
+    const next = new URLSearchParams(params);
+    if (to) next.set("group", to);
+    else next.delete("group");
+    next.delete("page");
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
   const [editing, setEditing] = useState<string | null>(null);
   const [armed, setArmed] = useState<string | null>(null); // group whose bin was clicked once
   const [removing, startRemove] = useTransition();
@@ -147,7 +161,8 @@ function SuggestList({
     };
     if (mode === "cancel" || !onRename || !to || to === from) return after();
     startRename(async () => {
-      await onRename(from, to);
+      const saved = await onRename(from, to);
+      if (saved) followTab(from, saved);
       after();
     });
   }
@@ -248,6 +263,7 @@ function SuggestList({
                   if (armed !== o) return setArmed(o);
                   startRemove(async () => {
                     await onRemove(o);
+                    followTab(o, "");
                     setArmed(null);
                   });
                 }}
