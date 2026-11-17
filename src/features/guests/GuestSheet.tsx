@@ -102,12 +102,16 @@ function useSuggest(options: string[]) {
   };
 }
 
+type GroupToolLabels = { renameGroup: string; removeGroup: string; removeGroupConfirm: string; delete: string };
+
 function SuggestList({
   anchor,
   s,
   current,
   onPick,
   onRename,
+  onRemove,
+  labels,
 }: {
   anchor: HTMLInputElement | null;
   s: ReturnType<typeof useSuggest>;
@@ -115,9 +119,19 @@ function SuggestList({
   onPick: (group: string) => void;
   /** ✎ on each group: rename it on all its guests; resolves to the saved name ("" = unchanged) */
   onRename?: (from: string, to: string) => Promise<string>;
+  /** bin on each group: take it off all its guests (two clicks) */
+  onRemove?: (group: string) => Promise<void>;
+  labels?: GroupToolLabels;
 }) {
   const { open, close } = s;
   const [editing, setEditing] = useState<string | null>(null);
+  const [armed, setArmed] = useState<string | null>(null); // group whose bin was clicked once
+  const [removing, startRemove] = useTransition();
+  useEffect(() => {
+    if (!armed) return;
+    const timer = setTimeout(() => setArmed(null), 4000);
+    return () => clearTimeout(timer);
+  }, [armed]);
   const [renaming, startRename] = useTransition();
   const done = useRef(false); // Enter saves; the blur that follows must not save again
 
@@ -210,8 +224,8 @@ function SuggestList({
             {onRename && (
               <button
                 type="button"
-                title={o}
-                aria-label={o}
+                title={labels?.renameGroup}
+                aria-label={labels?.renameGroup}
                 onMouseDown={(e) => {
                   e.preventDefault(); // not a pick
                   e.stopPropagation();
@@ -220,6 +234,31 @@ function SuggestList({
                 className="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-stone-400 transition hover:bg-brand-100 hover:text-brand-700"
               >
                 <Pencil className="size-3" />
+              </button>
+            )}
+            {onRemove && (
+              <button
+                type="button"
+                disabled={removing}
+                title={armed === o ? labels?.removeGroupConfirm : labels?.removeGroup}
+                aria-label={armed === o ? labels?.removeGroupConfirm : labels?.removeGroup}
+                onMouseDown={(e) => {
+                  e.preventDefault(); // not a pick; the field keeps the focus
+                  e.stopPropagation();
+                  if (armed !== o) return setArmed(o);
+                  startRemove(async () => {
+                    await onRemove(o);
+                    setArmed(null);
+                  });
+                }}
+                className={
+                  armed === o
+                    ? "inline-flex h-6 shrink-0 items-center gap-1 rounded-full bg-red-600 px-2 text-xs font-semibold text-white disabled:opacity-70"
+                    : "inline-flex size-6 shrink-0 items-center justify-center rounded-full text-stone-400 transition hover:bg-red-50 hover:text-red-600"
+                }
+              >
+                {removing && armed === o ? <Loader2 className="size-3 animate-spin" /> : <Trash2 className="size-3" />}
+                {armed === o && <span>{labels?.delete}?</span>}
               </button>
             )}
           </div>
@@ -242,6 +281,8 @@ function TextCell({
   className = "",
   options,
   onRenameOption,
+  onRemoveOption,
+  toolLabels,
 }: {
   value: string;
   field: keyof GuestPatch;
@@ -256,6 +297,9 @@ function TextCell({
   options?: string[];
   /** rename one of the options everywhere (groups): resolves to the saved name */
   onRenameOption?: (from: string, to: string) => Promise<string>;
+  /** take one of the options off everywhere (groups) */
+  onRemoveOption?: (option: string) => Promise<void>;
+  toolLabels?: GroupToolLabels;
 }) {
   const committed = useRef(value);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -333,6 +377,17 @@ function TextCell({
               return saved;
             })
           }
+          onRemove={
+            onRemoveOption &&
+            (async (group) => {
+              await onRemoveOption(group);
+              // this guest was in it: the server already cleared it
+              const el = inputRef.current;
+              if (el && el.value.trim() === group) el.value = "";
+              if (committed.current === group) committed.current = "";
+            })
+          }
+          labels={toolLabels}
         />
       )}
     </>
@@ -398,6 +453,7 @@ export function GuestQuickAdd({
   defaultSide,
   defaultGroup = "",
   renameGroup,
+  removeGroup,
 }: {
   add: (input: GuestPatch) => Promise<SheetResult>;
   groups: string[];
@@ -406,6 +462,7 @@ export function GuestQuickAdd({
   defaultGroup?: string;
   /** rename a group on all its guests (✎ in the group list) */
   renameGroup?: (from: string, to: string) => Promise<string>;
+  removeGroup?: (group: string) => Promise<void>;
 }) {
   const nameRef = useRef<HTMLInputElement>(null);
   const [side, setSide] = useState<GuestSide>(defaultSide ?? "BOTH");
@@ -513,6 +570,14 @@ export function GuestQuickAdd({
               return saved;
             })
           }
+          onRemove={
+            removeGroup &&
+            (async (g) => {
+              await removeGroup(g);
+              if (group.trim() === g) setGroup("");
+            })
+          }
+          labels={t}
         />
         <input name="invitedCount" type="number" inputMode="numeric" min={1} defaultValue={1} aria-label={t.invitedCount} title={t.invitedCount} className={field} />
         <button
@@ -572,6 +637,7 @@ export function GuestSheetRow({
   actions,
   groups,
   renameGroup,
+  removeGroup,
 }: {
   g: SheetGuest;
   save: (id: string, patch: GuestPatch) => Promise<SheetResult>;
@@ -581,6 +647,7 @@ export function GuestSheetRow({
   /** the event's groups, offered when editing a group cell */
   groups: string[];
   renameGroup?: (from: string, to: string) => Promise<string>;
+  removeGroup?: (group: string) => Promise<void>;
 }) {
   const { saveField, pick } = useRowSave(save, g.id);
   return (
@@ -598,7 +665,7 @@ export function GuestSheetRow({
         <ChipSelect value={g.side} options={SIDES} labels={(s) => t[`side_${s}`]} chip={SIDE_CHIP} label={t.side} onPick={(side) => pick({ side })} />
       </td>
       <td className="px-1 py-1.5">
-        <TextCell value={g.group ?? ""} field="group" save={saveField} label={t.group} placeholder="—" className="text-stone-600" options={groups} onRenameOption={renameGroup} />
+        <TextCell value={g.group ?? ""} field="group" save={saveField} label={t.group} placeholder="—" className="text-stone-600" options={groups} onRenameOption={renameGroup} onRemoveOption={removeGroup} toolLabels={t} />
       </td>
       <td className="w-20 px-1 py-1.5">
         <TextCell value={String(g.invitedCount)} field="invitedCount" save={saveField} label={t.invitedCount} type="number" inputMode="numeric" className="text-right font-medium" />
@@ -624,6 +691,7 @@ export function GuestSheetCard({
   actions,
   groups,
   renameGroup,
+  removeGroup,
 }: {
   g: SheetGuest;
   save: (id: string, patch: GuestPatch) => Promise<SheetResult>;
@@ -633,6 +701,7 @@ export function GuestSheetCard({
   /** the event's groups, offered when editing a group cell */
   groups: string[];
   renameGroup?: (from: string, to: string) => Promise<string>;
+  removeGroup?: (group: string) => Promise<void>;
 }) {
   const { saveField, pick } = useRowSave(save, g.id);
   return (
@@ -649,7 +718,7 @@ export function GuestSheetCard({
           <TextCell value={String(g.invitedCount)} field="invitedCount" save={saveField} label={t.invitedCount} type="number" inputMode="numeric" className="text-right" />
         </div>
       </div>
-      <TextCell value={g.group ?? ""} field="group" save={saveField} label={t.group} placeholder={t.group} className="text-stone-600" options={groups} onRenameOption={renameGroup} />
+      <TextCell value={g.group ?? ""} field="group" save={saveField} label={t.group} placeholder={t.group} className="text-stone-600" options={groups} onRenameOption={renameGroup} onRemoveOption={removeGroup} toolLabels={t} />
       <div className="flex flex-wrap items-center gap-1.5">
         <ChipSelect value={g.side} options={SIDES} labels={(s) => t[`side_${s}`]} chip={SIDE_CHIP} label={t.side} onPick={(side) => pick({ side })} />
         <ChipSelect value={g.status} options={STATUSES} labels={(s) => t[`status_${s}`]} chip={STATUS_CHIP} label={t.status} onPick={(status) => pick({ status })} />
