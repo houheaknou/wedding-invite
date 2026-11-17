@@ -1,23 +1,22 @@
 import Link from "next/link";
 import type { GuestSide, GuestStatus, Prisma } from "@prisma/client";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, Pencil, Phone, Plus, Send, Trash2, Upload, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, Send, Trash2, Upload, Users } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireOwnedEvent } from "@/features/auth/session";
 import { fmt, getDict } from "@/lib/i18n";
-import { PAGE_SIZES, SIDE_CHIP, SIDES, STATUS_CHIP, STATUSES } from "@/lib/constants";
-import { addGuest, deleteGuest, importGuests } from "@/features/guests/actions";
-import { ClickableRow } from "@/components/ClickableRow";
+import { PAGE_SIZES, SIDES, STATUSES } from "@/lib/constants";
+import { deleteGuest, importGuests, patchGuest, quickAddGuest } from "@/features/guests/actions";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { TelegramShareButton } from "@/components/TelegramShareButton";
 import { Dropdown } from "@/components/Dropdown";
 import { GuestFilters } from "@/features/guests/GuestFilters";
-import { GuestForm } from "@/features/guests/GuestForm";
+import { GuestQuickAdd, GuestSheetCard, GuestSheetRow } from "@/features/guests/GuestSheet";
 import { ImportForm } from "@/components/ImportForm";
 import { Modal } from "@/components/Modal";
 import { PageSizeSelect } from "@/components/PageSizeSelect";
-import { Avatar, btnIcon, btnPrimary, btnSecondary, card, chip } from "@/components/ui";
-import { pick, GUEST_FORM_KEYS, IMPORT_FORM_KEYS } from "@/lib/ui-keys";
+import { btnIcon, btnSecondary, card } from "@/components/ui";
+import { pick, GUEST_SHEET_KEYS, IMPORT_FORM_KEYS } from "@/lib/ui-keys";
 
 type SearchParams = { q?: string; group?: string; side?: string; status?: string; page?: string; size?: string };
 
@@ -69,7 +68,7 @@ export default async function GuestsPage({
   const page = Math.min(Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1), pages);
   const guests = await prisma.guest.findMany({
     where,
-    orderBy: { createdAt: "asc" },
+    orderBy: { createdAt: "desc" }, // newest first: a guest just added appears at the top
     skip: (page - 1) * size,
     take: size,
   });
@@ -92,6 +91,19 @@ export default async function GuestsPage({
   } as Parameters<typeof GuestFilters>[0]["labels"];
 
   const couple = `${event.groomName} & ${event.brideName}`;
+  const sheetT = pick(t, GUEST_SHEET_KEYS);
+  const groupNames = groupRows.map((g) => g.group!).filter(Boolean);
+  const save = patchGuest.bind(null, id);
+  const sheetGuest = (g: (typeof guests)[number]) => ({
+    id: g.id,
+    name: g.name,
+    phone: g.phone,
+    side: g.side,
+    group: g.group,
+    invitedCount: g.invitedCount,
+    status: g.status,
+    notes: g.notes,
+  });
   const rowActions = (guestId: string, guestName: string) => (
     <div className="flex justify-end gap-1.5">
       {invitation?.published && (
@@ -105,9 +117,6 @@ export default async function GuestsPage({
           <CopyLinkButton path={`/i/${invitation.shareId}/${guestId}`} label={t.copyInviteLink} />
         </>
       )}
-      <Link href={`/events/${id}/guests/${guestId}/edit`} className={btnIcon} title={t.edit} aria-label={t.edit}>
-        <Pencil className="size-3.5" />
-      </Link>
       <ConfirmButton
         action={deleteGuest.bind(null, id, guestId)}
         confirm={t.confirmDelete}
@@ -143,7 +152,7 @@ export default async function GuestsPage({
       <section className={`${card} space-y-4 p-3 sm:p-5`}>
         {/* Toolbar */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          <GuestFilters groups={groupRows.map((g) => g.group!).filter(Boolean)} labels={filterLabels} />
+          <GuestFilters groups={groupNames} labels={filterLabels} />
           <div className="flex items-center gap-2">
             <Modal
               title={t.import}
@@ -177,21 +186,10 @@ export default async function GuestsPage({
                 </a>
               ))}
             </Dropdown>
-            <Modal
-              title={t.addGuest}
-              closeLabel={t.close}
-              triggerClassName={btnPrimary}
-              trigger={
-                <>
-                  <Plus className="size-4" />
-                  {t.add}
-                </>
-              }
-            >
-              <GuestForm action={addGuest.bind(null, id)} t={pick(t, GUEST_FORM_KEYS)} />
-            </Modal>
           </div>
         </div>
+
+        <GuestQuickAdd add={quickAddGuest.bind(null, id)} groups={groupNames} t={sheetT} />
 
         {guests.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-12 text-center text-stone-500">
@@ -216,35 +214,7 @@ export default async function GuestsPage({
                 </thead>
                 <tbody className="divide-y divide-stone-100">
                   {guests.map((g) => (
-                    <ClickableRow key={g.id} href={`/events/${id}/guests/${g.id}/edit`} className="transition hover:bg-brand-50/60">
-                      <td className="px-4 py-2.5">
-                        <div className="flex items-center gap-2.5">
-                          <Avatar name={g.name} />
-                          <div className="min-w-0">
-                            <Link href={`/events/${id}/guests/${g.id}/edit`} className="font-medium text-stone-800 hover:text-brand-700 hover:underline">
-                              {g.name}
-                            </Link>
-                            {g.notes && <div className="truncate text-xs text-stone-500">{g.notes}</div>}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-3 py-2.5 whitespace-nowrap text-stone-600">{g.phone || <span className="text-stone-300">—</span>}</td>
-                      <td className="px-3 py-2.5">
-                        <span className={`${chip} ${SIDE_CHIP[g.side]}`}>{t[`side_${g.side}`]}</span>
-                      </td>
-                      <td className="px-3 py-2.5">
-                        {g.group ? (
-                          <span className={`${chip} bg-stone-100 text-stone-600`}>{g.group}</span>
-                        ) : (
-                          <span className="text-stone-300">—</span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2.5 text-right font-medium">{g.invitedCount}</td>
-                      <td className="px-3 py-2.5">
-                        <span className={`${chip} ${STATUS_CHIP[g.status]}`}>{t[`status_${g.status}`]}</span>
-                      </td>
-                      <td className="px-4 py-2">{rowActions(g.id, g.name)}</td>
-                    </ClickableRow>
+                    <GuestSheetRow key={g.id} g={sheetGuest(g)} save={save} t={sheetT} editHref={`/events/${id}/guests/${g.id}/edit`} actions={rowActions(g.id, g.name)} />
                   ))}
                 </tbody>
               </table>
@@ -253,35 +223,7 @@ export default async function GuestsPage({
             {/* Mobile cards */}
             <ul className="space-y-2 md:hidden">
               {guests.map((g) => (
-                <ClickableRow as="li" key={g.id} href={`/events/${id}/guests/${g.id}/edit`} className="flex gap-3 rounded-2xl border border-stone-100 p-3 transition hover:bg-brand-50/60">
-                  <Avatar name={g.name} className="size-10 text-sm" />
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <Link href={`/events/${id}/guests/${g.id}/edit`} className="block truncate font-medium">
-                          {g.name}
-                        </Link>
-                        {g.phone && (
-                          <p className="flex items-center gap-1 text-xs text-stone-500">
-                            <Phone className="size-3" />
-                            {g.phone}
-                          </p>
-                        )}
-                      </div>
-                      {rowActions(g.id, g.name)}
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      <span className={`${chip} ${SIDE_CHIP[g.side]}`}>{t[`side_${g.side}`]}</span>
-                      {g.group && <span className={`${chip} bg-stone-100 text-stone-600`}>{g.group}</span>}
-                      <span className={`${chip} ${STATUS_CHIP[g.status]}`}>{t[`status_${g.status}`]}</span>
-                      <span className={`${chip} bg-white text-stone-600 ring-1 ring-stone-200`}>
-                        <Users className="mr-1 size-3" />
-                        {g.invitedCount}
-                      </span>
-                    </div>
-                    {g.notes && <p className="text-xs text-stone-500">{g.notes}</p>}
-                  </div>
-                </ClickableRow>
+                <GuestSheetCard key={g.id} g={sheetGuest(g)} save={save} t={sheetT} editHref={`/events/${id}/guests/${g.id}/edit`} actions={rowActions(g.id, g.name)} />
               ))}
             </ul>
           </>

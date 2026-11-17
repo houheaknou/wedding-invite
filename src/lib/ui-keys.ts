@@ -75,6 +75,29 @@ export const EVENT_FORM_KEYS = keys(
 );
 export type EventFormDict = Pick<Dict, (typeof EVENT_FORM_KEYS)[number]>;
 
+export const GUEST_SHEET_KEYS = keys(
+  "addGuest",
+  "quickAddHint",
+  "guestAdded",
+  "add",
+  "edit",
+  "errRequired",
+  "name",
+  "phone",
+  "side",
+  "group",
+  "invitedCount",
+  "status",
+  "side_BRIDE",
+  "side_GROOM",
+  "side_BOTH",
+  "status_PENDING",
+  "status_INVITED",
+  "status_CONFIRMED",
+  "status_DECLINED",
+);
+export type GuestSheetDict = Pick<Dict, (typeof GUEST_SHEET_KEYS)[number]>;
+
 export const GUEST_FORM_KEYS = keys(
   "addGuest",
   "back",

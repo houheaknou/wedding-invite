@@ -90,3 +90,78 @@ export async function importGuests(eventId: string, _: ImportState, fd: FormData
   revalidatePath(`/events/${eventId}`, "layout");
   return { message: fmt(t.importDone, { imported: result.guests.length, skipped: result.skipped }) };
 }
+
+/* ───────── spreadsheet-style editing on the guests page (GuestSheet) ───────── */
+
+export type GuestFields = {
+  name: string;
+  phone: string | null;
+  side: GuestSide;
+  group: string | null;
+  invitedCount: number;
+  status: GuestStatus;
+  notes: string | null;
+};
+export type GuestPatch = Partial<GuestFields>;
+export type SheetResult = { ok: true } | { ok: false; error: string };
+
+const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+
+/** Check and normalise fields sent from the browser; null when a value is invalid. */
+function cleanPatch(p: GuestPatch): GuestPatch | null {
+  const out: GuestPatch = {};
+  if ("name" in p) {
+    const name = text(p.name, 200);
+    if (!name) return null;
+    out.name = name;
+  }
+  if ("phone" in p) out.phone = text(p.phone, 40) || null;
+  if ("group" in p) out.group = text(p.group, 80) || null;
+  if ("notes" in p) out.notes = text(p.notes, 1000) || null;
+  if ("side" in p) {
+    if (!SIDES.includes(p.side as GuestSide)) return null;
+    out.side = p.side;
+  }
+  if ("status" in p) {
+    if (!STATUSES.includes(p.status as GuestStatus)) return null;
+    out.status = p.status;
+  }
+  if ("invitedCount" in p) {
+    const n = Math.trunc(Number(p.invitedCount));
+    if (!Number.isFinite(n) || n < 1) return null;
+    out.invitedCount = Math.min(n, 999);
+  }
+  return out;
+}
+
+/** Quick-add row: one guest from the sheet, no page change. */
+export async function quickAddGuest(eventId: string, input: GuestPatch): Promise<SheetResult> {
+  await requireOwnedEvent(eventId);
+  const { t } = await getDict();
+  const data = cleanPatch({ side: "BOTH", status: "PENDING", invitedCount: 1, ...input });
+  if (!data?.name) return { ok: false, error: t.errRequired };
+  await prisma.guest.create({
+    data: {
+      eventId,
+      name: data.name,
+      phone: data.phone ?? null,
+      group: data.group ?? null,
+      side: data.side ?? "BOTH",
+      status: data.status ?? "PENDING",
+      invitedCount: data.invitedCount ?? 1,
+    },
+  });
+  revalidatePath(`/events/${eventId}`, "layout");
+  return { ok: true };
+}
+
+/** Inline edit: save the one field that changed. */
+export async function patchGuest(eventId: string, guestId: string, patch: GuestPatch): Promise<SheetResult> {
+  await requireOwnedGuest(eventId, guestId);
+  const { t } = await getDict();
+  const data = cleanPatch(patch);
+  if (!data || Object.keys(data).length === 0) return { ok: false, error: t.errRequired };
+  await prisma.guest.update({ where: { id: guestId }, data });
+  revalidatePath(`/events/${eventId}`, "layout");
+  return { ok: true };
+}
