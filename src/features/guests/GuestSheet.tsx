@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
-import { Loader2, Plus, Trash2, Users } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash2, Users } from "lucide-react";
 import type { GuestSide, GuestStatus } from "@prisma/client";
 import type { GuestPatch, SheetResult } from "@/features/guests/actions";
 import { SIDE_CHIP, SIDES, STATUS_CHIP, STATUSES } from "@/lib/constants";
@@ -67,10 +67,14 @@ function useSuggest(options: string[]) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState(""); // "" = show every group
   const [hi, setHi] = useState(-1);
+  const listRef = useRef<HTMLDivElement>(null);
   const q = query.trim().toLowerCase();
   const list = options.filter((o) => !q || o.toLowerCase().includes(q));
   return {
     open: open && list.length > 0,
+    listRef,
+    /** focus went into the list (its rename box): the field keeps the list open and doesn't save */
+    inside: (el: EventTarget | null) => Boolean(el && listRef.current?.contains(el as Node)),
     list,
     hi,
     showAll: () => {
@@ -103,13 +107,37 @@ function SuggestList({
   s,
   current,
   onPick,
+  onRename,
 }: {
   anchor: HTMLInputElement | null;
   s: ReturnType<typeof useSuggest>;
   current: string;
   onPick: (group: string) => void;
+  /** ✎ on each group: rename it on all its guests; resolves to the saved name ("" = unchanged) */
+  onRename?: (from: string, to: string) => Promise<string>;
 }) {
   const { open, close } = s;
+  const [editing, setEditing] = useState<string | null>(null);
+  const [renaming, startRename] = useTransition();
+  const done = useRef(false); // Enter saves; the blur that follows must not save again
+
+  // back: Enter / Esc return to the group field (list stays open); clicking away closes the list
+  function finish(input: HTMLInputElement, from: string, mode: "save" | "cancel", back: boolean) {
+    if (done.current) return;
+    done.current = true;
+    const to = input.value.trim();
+    const after = () => {
+      setEditing(null);
+      if (back) anchor?.focus();
+      else close();
+    };
+    if (mode === "cancel" || !onRename || !to || to === from) return after();
+    startRename(async () => {
+      await onRename(from, to);
+      after();
+    });
+  }
+
   // pinned to the screen (the table scrolls sideways and would clip it): close when the page moves
   useEffect(() => {
     if (!open) return;
@@ -126,6 +154,7 @@ function SuggestList({
   const below = r.bottom + 230 < window.innerHeight;
   return (
     <div
+      ref={s.listRef}
       role="listbox"
       style={{
         left: Math.min(r.left, window.innerWidth - width - 8),
@@ -134,24 +163,68 @@ function SuggestList({
       }}
       className="fixed z-50 max-h-56 overflow-y-auto rounded-xl border border-stone-200 bg-white p-1 text-sm shadow-xl"
     >
-      {s.list.map((o, i) => (
-        <div
-          key={o}
-          role="option"
-          aria-selected={o === current}
-          // mousedown, not click: keep the focus in the field so it saves on its own blur
-          onMouseDown={(e) => {
-            e.preventDefault();
-            onPick(o);
-          }}
-          className={`flex cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 ${
-            i === s.hi ? "bg-brand-50 text-brand-700" : "text-stone-700 hover:bg-stone-50"
-          } ${o === current ? "font-semibold" : ""}`}
-        >
-          <span className="truncate">{o}</span>
-          {o === current && <span className="text-xs text-brand-600">✓</span>}
-        </div>
-      ))}
+      {s.list.map((o, i) =>
+        editing === o ? (
+          <div key={o} className="flex items-center gap-1 rounded-lg px-1 py-0.5">
+            <input
+              autoFocus
+              defaultValue={o}
+              maxLength={80}
+              disabled={renaming}
+              aria-label={o}
+              onFocus={(e) => {
+                done.current = false;
+                e.currentTarget.select();
+              }}
+              onBlur={(e) => finish(e.currentTarget, o, "save", false)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  finish(e.currentTarget, o, "save", true);
+                }
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  finish(e.currentTarget, o, "cancel", true);
+                }
+              }}
+              className="min-w-0 flex-1 rounded-md border border-brand-300 px-2 py-1 text-sm outline-none ring-2 ring-brand-100 disabled:opacity-60"
+            />
+            {renaming && <Loader2 className="size-3.5 shrink-0 animate-spin text-brand-600" />}
+          </div>
+        ) : (
+          <div
+            key={o}
+            role="option"
+            aria-selected={o === current}
+            // mousedown, not click: keep the focus in the field so it saves on its own blur
+            onMouseDown={(e) => {
+              e.preventDefault();
+              onPick(o);
+            }}
+            className={`group flex cursor-pointer items-center gap-1 rounded-lg py-1 pl-2.5 pr-1 ${
+              i === s.hi ? "bg-brand-50 text-brand-700" : "text-stone-700 hover:bg-stone-50"
+            } ${o === current ? "font-semibold" : ""}`}
+          >
+            <span className="min-w-0 flex-1 truncate">{o}</span>
+            {o === current && <span className="text-xs text-brand-600">✓</span>}
+            {onRename && (
+              <button
+                type="button"
+                title={o}
+                aria-label={o}
+                onMouseDown={(e) => {
+                  e.preventDefault(); // not a pick
+                  e.stopPropagation();
+                  setEditing(o);
+                }}
+                className="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-stone-400 transition hover:bg-brand-100 hover:text-brand-700"
+              >
+                <Pencil className="size-3" />
+              </button>
+            )}
+          </div>
+        ),
+      )}
     </div>
   );
 }
@@ -168,6 +241,7 @@ function TextCell({
   required = false,
   className = "",
   options,
+  onRenameOption,
 }: {
   value: string;
   field: keyof GuestPatch;
@@ -180,6 +254,8 @@ function TextCell({
   className?: string;
   /** values to pick from (the event's groups) */
   options?: string[];
+  /** rename one of the options everywhere (groups): resolves to the saved name */
+  onRenameOption?: (from: string, to: string) => Promise<string>;
 }) {
   const committed = useRef(value);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -224,6 +300,7 @@ function TextCell({
         onFocus={options ? suggest.showAll : undefined}
         onInput={options ? (e) => suggest.typed(e.currentTarget.value) : undefined}
         onBlur={(e) => {
+          if (suggest.inside(e.relatedTarget)) return; // renaming a group in the list
           suggest.close();
           void commit(e.currentTarget);
         }}
@@ -238,7 +315,25 @@ function TextCell({
         }}
       />
       {options && (
-        <SuggestList anchor={inputRef.current} s={suggest} current={inputRef.current?.value.trim() ?? value} onPick={pick} />
+        <SuggestList
+          anchor={inputRef.current}
+          s={suggest}
+          current={inputRef.current?.value.trim() ?? value}
+          onPick={pick}
+          onRename={
+            onRenameOption &&
+            (async (from, to) => {
+              const saved = await onRenameOption(from, to);
+              // this guest was in the renamed group: the server already moved it, show the new name
+              const el = inputRef.current;
+              if (saved && el && el.value.trim() === from) {
+                el.value = saved;
+                if (committed.current === from) committed.current = saved;
+              }
+              return saved;
+            })
+          }
+        />
       )}
     </>
   );
@@ -302,12 +397,15 @@ export function GuestQuickAdd({
   t,
   defaultSide,
   defaultGroup = "",
+  renameGroup,
 }: {
   add: (input: GuestPatch) => Promise<SheetResult>;
   groups: string[];
   t: GuestSheetDict;
   defaultSide?: GuestSide;
   defaultGroup?: string;
+  /** rename a group on all its guests (✎ in the group list) */
+  renameGroup?: (from: string, to: string) => Promise<string>;
 }) {
   const nameRef = useRef<HTMLInputElement>(null);
   const [side, setSide] = useState<GuestSide>(defaultSide ?? "BOTH");
@@ -383,7 +481,9 @@ export function GuestQuickAdd({
             groupSuggest.typed(e.target.value);
           }}
           onFocus={groupSuggest.showAll}
-          onBlur={groupSuggest.close}
+          onBlur={(e) => {
+            if (!groupSuggest.inside(e.relatedTarget)) groupSuggest.close();
+          }}
           onKeyDown={(e) => {
             const picked = groupSuggest.key(e);
             if (picked !== null) {
@@ -405,6 +505,14 @@ export function GuestQuickAdd({
             setGroup(g);
             groupSuggest.close();
           }}
+          onRename={
+            renameGroup &&
+            (async (from, to) => {
+              const saved = await renameGroup(from, to);
+              if (saved && group.trim() === from) setGroup(saved);
+              return saved;
+            })
+          }
         />
         <input name="invitedCount" type="number" inputMode="numeric" min={1} defaultValue={1} aria-label={t.invitedCount} title={t.invitedCount} className={field} />
         <button
@@ -463,6 +571,7 @@ export function GuestSheetRow({
   edit,
   actions,
   groups,
+  renameGroup,
 }: {
   g: SheetGuest;
   save: (id: string, patch: GuestPatch) => Promise<SheetResult>;
@@ -471,6 +580,7 @@ export function GuestSheetRow({
   actions: ReactNode;
   /** the event's groups, offered when editing a group cell */
   groups: string[];
+  renameGroup?: (from: string, to: string) => Promise<string>;
 }) {
   const { saveField, pick } = useRowSave(save, g.id);
   return (
@@ -488,7 +598,7 @@ export function GuestSheetRow({
         <ChipSelect value={g.side} options={SIDES} labels={(s) => t[`side_${s}`]} chip={SIDE_CHIP} label={t.side} onPick={(side) => pick({ side })} />
       </td>
       <td className="px-1 py-1.5">
-        <TextCell value={g.group ?? ""} field="group" save={saveField} label={t.group} placeholder="—" className="text-stone-600" options={groups} />
+        <TextCell value={g.group ?? ""} field="group" save={saveField} label={t.group} placeholder="—" className="text-stone-600" options={groups} onRenameOption={renameGroup} />
       </td>
       <td className="w-20 px-1 py-1.5">
         <TextCell value={String(g.invitedCount)} field="invitedCount" save={saveField} label={t.invitedCount} type="number" inputMode="numeric" className="text-right font-medium" />
@@ -513,6 +623,7 @@ export function GuestSheetCard({
   edit,
   actions,
   groups,
+  renameGroup,
 }: {
   g: SheetGuest;
   save: (id: string, patch: GuestPatch) => Promise<SheetResult>;
@@ -521,6 +632,7 @@ export function GuestSheetCard({
   actions: ReactNode;
   /** the event's groups, offered when editing a group cell */
   groups: string[];
+  renameGroup?: (from: string, to: string) => Promise<string>;
 }) {
   const { saveField, pick } = useRowSave(save, g.id);
   return (
@@ -537,7 +649,7 @@ export function GuestSheetCard({
           <TextCell value={String(g.invitedCount)} field="invitedCount" save={saveField} label={t.invitedCount} type="number" inputMode="numeric" className="text-right" />
         </div>
       </div>
-      <TextCell value={g.group ?? ""} field="group" save={saveField} label={t.group} placeholder={t.group} className="text-stone-600" options={groups} />
+      <TextCell value={g.group ?? ""} field="group" save={saveField} label={t.group} placeholder={t.group} className="text-stone-600" options={groups} onRenameOption={renameGroup} />
       <div className="flex flex-wrap items-center gap-1.5">
         <ChipSelect value={g.side} options={SIDES} labels={(s) => t[`side_${s}`]} chip={SIDE_CHIP} label={t.side} onPick={(side) => pick({ side })} />
         <ChipSelect value={g.status} options={STATUSES} labels={(s) => t[`status_${s}`]} chip={STATUS_CHIP} label={t.status} onPick={(status) => pick({ status })} />

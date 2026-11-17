@@ -249,6 +249,7 @@ export default async function GuestsPage({
           key={`${side ?? ""}|${group ?? ""}`}
           add={quickAddGuest.bind(null, id)}
           groups={groupNames}
+          renameGroup={renameGroup.bind(null, id)}
           t={sheetT}
           defaultSide={side}
           defaultGroup={group && group !== NO_GROUP ? group : ""}
@@ -277,7 +278,7 @@ export default async function GuestsPage({
                 </thead>
                 <tbody className="divide-y divide-stone-100">
                   {guests.map((g) => (
-                    <GuestSheetRow key={g.id} g={sheetGuest(g)} save={save} t={sheetT} edit={editPopup(g)} actions={rowActions(g.id, g.name)} groups={groupNames} />
+                    <GuestSheetRow key={g.id} g={sheetGuest(g)} save={save} t={sheetT} edit={editPopup(g)} actions={rowActions(g.id, g.name)} groups={groupNames} renameGroup={renameGroup.bind(null, id)} />
                   ))}
                 </tbody>
               </table>
@@ -286,7 +287,7 @@ export default async function GuestsPage({
             {/* Mobile cards */}
             <ul className="space-y-2 md:hidden">
               {guests.map((g) => (
-                <GuestSheetCard key={g.id} g={sheetGuest(g)} save={save} t={sheetT} edit={editPopup(g)} actions={rowActions(g.id, g.name)} groups={groupNames} />
+                <GuestSheetCard key={g.id} g={sheetGuest(g)} save={save} t={sheetT} edit={editPopup(g)} actions={rowActions(g.id, g.name)} groups={groupNames} renameGroup={renameGroup.bind(null, id)} />
               ))}
             </ul>
           </>
