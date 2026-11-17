@@ -178,14 +178,18 @@ export function GuestQuickAdd({
   add,
   groups,
   t,
+  defaultSide,
+  defaultGroup = "",
 }: {
   add: (input: GuestPatch) => Promise<SheetResult>;
   groups: string[];
   t: GuestSheetDict;
+  defaultSide?: GuestSide;
+  defaultGroup?: string;
 }) {
   const nameRef = useRef<HTMLInputElement>(null);
-  const [side, setSide] = useState<GuestSide>("BOTH");
-  const [group, setGroup] = useState("");
+  const [side, setSide] = useState<GuestSide>(defaultSide ?? "BOTH");
+  const [group, setGroup] = useState(defaultGroup);
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useTransition();
   const field =

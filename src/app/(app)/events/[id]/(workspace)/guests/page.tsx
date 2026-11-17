@@ -10,6 +10,7 @@ import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { TelegramShareButton } from "@/components/TelegramShareButton";
 import { Dropdown } from "@/components/Dropdown";
 import { GuestFilters } from "@/features/guests/GuestFilters";
+import { GuestTabs, NO_GROUP } from "@/features/guests/GuestTabs";
 import { GuestForm } from "@/features/guests/GuestForm";
 import { DeleteGuestButton, GuestQuickAdd, GuestSheetCard, GuestSheetRow } from "@/features/guests/GuestSheet";
 import { ImportForm } from "@/components/ImportForm";
@@ -43,7 +44,7 @@ export default async function GuestsPage({
     eventId: id,
     side,
     status,
-    group,
+    group: group === NO_GROUP ? null : group,
     ...(q && {
       OR: [
         { name: { contains: q, mode: "insensitive" } },
@@ -53,7 +54,7 @@ export default async function GuestsPage({
     }),
   };
 
-  const [matching, totals, groupRows, invitation] = await Promise.all([
+  const [matching, totals, groupRows, invitation, bySide, byGroup] = await Promise.all([
     prisma.guest.count({ where }),
     prisma.guest.aggregate({ where: { eventId: id }, _count: true, _sum: { invitedCount: true } }),
     prisma.guest.findMany({
@@ -63,7 +64,18 @@ export default async function GuestsPage({
       orderBy: { group: "asc" },
     }),
     prisma.invitation.findUnique({ where: { eventId: id }, select: { shareId: true, published: true, lang: true } }),
+    // tab counts: guests per side, and per group within the chosen side
+    prisma.guest.groupBy({ by: ["side"], where: { eventId: id }, _count: true }),
+    prisma.guest.groupBy({ by: ["group"], where: { eventId: id, side }, _count: true }),
   ]);
+  const sideCounts = {
+    all: totals._count,
+    ...Object.fromEntries(bySide.map((r) => [r.side, r._count])),
+  } as Parameters<typeof GuestTabs>[0]["sideCounts"];
+  // largest groups first, "no group" last
+  const groupCounts = byGroup
+    .map((r) => ({ group: r.group, n: r._count }))
+    .sort((a, b) => (a.group === null ? 1 : b.group === null ? -1 : b.n - a.n || a.group.localeCompare(b.group)));
   const pages = Math.max(1, Math.ceil(matching / size));
   const page = Math.min(Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1), pages);
   const guests = await prisma.guest.findMany({
@@ -171,9 +183,18 @@ export default async function GuestsPage({
       )}
 
       <section className={`${card} space-y-4 p-3 sm:p-5`}>
+        <GuestTabs
+          sp={sp}
+          side={side}
+          group={group}
+          sideCounts={sideCounts}
+          groupCounts={groupCounts}
+          t={{ all: t.all, group: t.group, noGroup: t.noGroup, side_BRIDE: t.side_BRIDE, side_GROOM: t.side_GROOM, side_BOTH: t.side_BOTH }}
+        />
+
         {/* Toolbar */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          <GuestFilters groups={groupNames} labels={filterLabels} />
+          <GuestFilters labels={filterLabels} />
           <div className="flex items-center gap-2">
             <Modal
               title={t.import}
@@ -210,7 +231,15 @@ export default async function GuestsPage({
           </div>
         </div>
 
-        <GuestQuickAdd add={quickAddGuest.bind(null, id)} groups={groupNames} t={sheetT} />
+        {/* adds to the side / group of the open tab */}
+        <GuestQuickAdd
+          key={`${side ?? ""}|${group ?? ""}`}
+          add={quickAddGuest.bind(null, id)}
+          groups={groupNames}
+          t={sheetT}
+          defaultSide={side}
+          defaultGroup={group && group !== NO_GROUP ? group : ""}
+        />
 
         {guests.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-12 text-center text-stone-500">

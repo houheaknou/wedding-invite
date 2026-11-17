@@ -17,8 +17,8 @@ type Labels = {
   clear: string;
 } & Record<`side_${(typeof SIDES)[number]}` | `status_${(typeof STATUSES)[number]}`, string>;
 
-/** Search + filter pills that update the URL query (and reset to page 1). */
-export function GuestFilters({ groups, labels }: { groups: string[]; labels: Labels }) {
+/** Search + status filter that update the URL query (and reset to page 1). Side and group are tabs (GuestTabs). */
+export function GuestFilters({ labels }: { labels: Labels }) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -47,7 +47,7 @@ export function GuestFilters({ groups, labels }: { groups: string[]; labels: Lab
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run when the text changes
   }, [q]);
 
-  const filtered = ["q", "group", "side", "status"].some((k) => params.get(k));
+  const filtered = ["q", "status"].some((k) => params.get(k));
 
   return (
     <div className={`flex flex-1 flex-wrap items-center gap-2 transition ${pending ? "opacity-70" : ""}`}>
@@ -61,36 +61,6 @@ export function GuestFilters({ groups, labels }: { groups: string[]; labels: Lab
           type="search"
         />
       </label>
-      <select
-        aria-label={labels.group}
-        value={params.get("group") ?? ""}
-        onChange={(e) => update({ group: e.target.value })}
-        className={`${pill} max-w-40`}
-      >
-        <option value="">
-          {labels.group}: {labels.all}
-        </option>
-        {groups.map((g) => (
-          <option key={g} value={g}>
-            {g}
-          </option>
-        ))}
-      </select>
-      <select
-        aria-label={labels.side}
-        value={params.get("side") ?? ""}
-        onChange={(e) => update({ side: e.target.value })}
-        className={pill}
-      >
-        <option value="">
-          {labels.side}: {labels.all}
-        </option>
-        {SIDES.map((s) => (
-          <option key={s} value={s}>
-            {labels[`side_${s}`]}
-          </option>
-        ))}
-      </select>
       <select
         aria-label={labels.status}
         value={params.get("status") ?? ""}
@@ -112,7 +82,7 @@ export function GuestFilters({ groups, labels }: { groups: string[]; labels: Lab
           onClick={() => {
             setQ("");
             first.current = true;
-            startTransition(() => router.replace(pathname, { scroll: false }));
+            update({ q: "", status: "" }); // keeps the side / group tab
           }}
           className="inline-flex h-9 items-center gap-1 rounded-full px-3 text-sm text-brand-700 hover:bg-brand-50"
         >
