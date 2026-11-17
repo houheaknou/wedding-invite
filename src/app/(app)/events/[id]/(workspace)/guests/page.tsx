@@ -139,6 +139,7 @@ export default async function GuestsPage({
             path={`/i/${invitation.shareId}/${guestId}`}
             label={t.shareTelegram}
             message={{ ...shareEvent, guestName }}
+            askTerm={t.tgAddressAs}
           />
           <CopyLinkButton path={`/i/${invitation.shareId}/${guestId}`} label={t.copyInviteLink} />
         </>

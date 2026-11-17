@@ -391,6 +391,7 @@ const km = {
   menuDesc_footer: "សារអរគុណ ប៊ូតុងចែករំលែក ជាដើម។",
   // Telegram sharing
   shareTelegram: "ផ្ញើតាម Telegram",
+  tgAddressAs: "ហៅភ្ញៀវថា",
   tgNotPublished: "ដើម្បីផ្ញើតំណធៀបទៅភ្ញៀវ សូមបើក «បើកឲ្យភ្ញៀវមើលបាន» នៅក្នុងផ្ទាំង គំរូធៀប ហើយរក្សាទុក។",
   openTemplate: "ទៅកាន់គំរូធៀប",
   contactPhones: "លេខទំនាក់ទំនង (មួយបន្ទាត់មួយលេខ)",
@@ -822,6 +823,7 @@ const en: Dict = {
   menuDesc_rsvp: "Guest confirmation form and contact information.",
   menuDesc_footer: "Thank you message, sharing buttons, etc.",
   shareTelegram: "Send via Telegram",
+  tgAddressAs: "Address the guest as",
   tgNotPublished: "To send invitation links to guests, turn on \"Guests can open it\" in the Template tab and save.",
   openTemplate: "Open Template",
   contactPhones: "Contact numbers (one per line)",

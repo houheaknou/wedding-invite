@@ -17,8 +17,14 @@ export type ShareMessageInput = {
   venue?: string | null;
   venueEn?: string | null;
   address?: string | null;
+  /** How the guest is addressed in Khmer (older / younger / formal…); default បង, or លោកអ្នក with no guest */
+  term?: KhmerTerm;
   url: string;
 };
+
+/** Khmer forms of address, in the order the share menu shows them */
+export const KHMER_TERMS = ["បង", "ប្អូន", "លោក", "អ្នកស្រី", "លោកអ្នក"] as const;
+export type KhmerTerm = (typeof KHMER_TERMS)[number];
 
 const KM_DAYS = ["អាទិត្យ", "ច័ន្ទ", "អង្គារ", "ពុធ", "ព្រហស្បតិ៍", "សុក្រ", "សៅរ៍"];
 const KM_MONTHS = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"];
@@ -66,12 +72,18 @@ export function inviteShareMessage(m: ShareMessageInput): string {
 
   const place = [clean(m.venue), clean(m.address)].filter(Boolean).join(", ");
   const period = h < 12 ? "ព្រឹក" : h < 13 ? "ថ្ងៃត្រង់" : h < 17 ? "រសៀល" : h < 19 ? "ល្ងាច" : "យប់";
-  const you = guest ? "បង" : "លោកអ្នក";
+  const you: KhmerTerm = m.term ?? (guest ? "បង" : "លោកអ្នក");
+  // "បង ហូ ហៀកនូ": add the term before the name unless it was typed as part of it
+  const named = guest && !guest.startsWith(you) ? `${you} ${guest}` : guest;
+  // a younger guest gets a friendly hello instead of the respectful one
+  const younger = you === "ប្អូន";
+  const hello = younger ? "សួស្តី" : "ជំរាបសួរ";
+  const invite = younger ? "សូមអញ្ជើញ" : "សូមគោរពអញ្ជើញ";
   return [
     "💌✨ សំបុត្រអញ្ជើញមង្គលការ ✨💌",
     "",
-    ...(guest ? [`🌸 ជំរាបសួរ ${guest} 🌸`, ""] : []),
-    `💍 យើងខ្ញុំទាំងពីរ សូមគោរពអញ្ជើញ${you}`,
+    ...(guest ? [`🌸 ${hello} ${named} 🌸`, ""] : []),
+    `💍 យើងខ្ញុំទាំងពីរ ${invite}${you}`,
     "មកចូលរួមអបអរសាទរ ពិធីមង្គលការរបស់យើងខ្ញុំ",
     "និងរីករាយជាមួយពេលវេលាដ៏ពិសេសនេះ 🥰",
     "",

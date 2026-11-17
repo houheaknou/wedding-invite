@@ -40,6 +40,22 @@ describe("inviteShareMessage (Telegram invitation text)", () => {
     );
   });
 
+  it("a younger guest (ប្អូន): friendly hello, no គោរព, and ប្អូន throughout", () => {
+    const msg = inviteShareMessage({ ...base, lang: "km", guestName: "ដារ៉ា", term: "ប្អូន" });
+    expect(msg).toContain("🌸 សួស្តី ប្អូន ដារ៉ា 🌸");
+    expect(msg).toContain("💍 យើងខ្ញុំទាំងពីរ សូមអញ្ជើញប្អូន");
+    expect(msg).toContain("💕 វត្តមានរបស់ប្អូន គឺជាកិត្តិយស");
+    expect(msg).not.toContain("បង");
+  });
+
+  it("other terms keep the respectful wording; the term isn't doubled when typed in the name", () => {
+    const lok = inviteShareMessage({ ...base, lang: "km", guestName: "សុខ ចាន់", term: "លោក" });
+    expect(lok).toContain("🌸 ជំរាបសួរ លោក សុខ ចាន់ 🌸");
+    expect(lok).toContain("សូមគោរពអញ្ជើញលោក");
+    const typed = inviteShareMessage({ ...base, lang: "km", guestName: "អ្នកស្រី ស្រីពៅ", term: "អ្នកស្រី" });
+    expect(typed).toContain("🌸 ជំរាបសួរ អ្នកស្រី ស្រីពៅ 🌸");
+  });
+
   it("without a guest: no greeting line, addresses លោកអ្នក; no place line when empty", () => {
     const msg = inviteShareMessage({ ...base, lang: "km", venue: null, address: " " });
     expect(msg).not.toContain("ជំរាបសួរ");
